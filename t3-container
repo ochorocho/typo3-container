@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+
+# If we're running in CI we need to disable TTY allocation for docker compose
+# commands that enable it by default, such as exec and run.
+TTY=""
+if [[ ! -t 1 ]]; then
+  TTY="-T"
+fi
+
+declare -A IMAGE_OPTIONS
+
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+function _echo {
+  echo -e "${2}${1}${NO_COLOR}"
+}
+
+function requirements {
+  default_version="dev-main"
+  typo3_version_input="${1:-$default_version}"
+
+  if [ "$typo3_version_input" == "dev-main" ]; then
+    composer_json=$(curl -s "https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json")
+    typo3_version_name="${typo3_version_input}"
+  else
+    tags=$(curl -s "https://api.github.com/repos/typo3/typo3/tags?per_page=999")
+    sha=$(echo $tags | jq -r '[.[] | select(.name | contains("'${typo3_version_input}'"))][0].commit.sha')
+    composer_json=$(curl -s "https://raw.githubusercontent.com/TYPO3/typo3/${sha}/composer.json")
+    typo3_version_name=$(echo $tags | jq -r '[.[] | select(.name | contains("'${typo3_version_input}'"))][0].name // empty')
+  fi
+
+  if [ -z "$typo3_version_name" ]; then
+    _echo "No TYPO3 version tag found, for available versions see https://github.com/typo3/typo3/tags" "$RED"
+    exit 1
+  fi
+
+  _echo "Selected TYPO3 version:" "$GREEN"
+  echo "  * $typo3_version_name"
+
+  # Get PHP version set in composer.json of given "typo3_version".
+  # In case multiple versions are set, e.g. "7.4 || 8.0" the latest version will be used.
+  declare -a php_versions_available=($(echo $composer_json | jq '.require.php' | sed 's/[^0-9|A-Z.]*//g' | tr "||" "\n"))
+  _echo "PHP version to be included:" "$GREEN"
+  _echo "  * ${php_versions_available[-1]}"
+
+  # Get PHP modules set in composer.json of given "typo3_version"
+  declare -a EXT=($(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")'))
+  php_modules_composer_json=()
+  for i in "${EXT[@]}"; do
+    :
+    extension_name=$(sed 's/ext\-//g;s/[^0-9 a-zA-Z]*//g;s/ //g' <<<"$i")
+    php_modules_composer_json+=("${extension_name,,}")
+  done
+
+  # Scrape modules from base image
+  # and compare available vs. required php modules
+  # to enable on the ones not already enabled.
+  php_modules_in_base=($(docker run --rm -it php:${php_versions_available[-1]}-apache php -m))
+
+  _echo "PHP modules to be included (excluding those already enabled):" "$GREEN"
+  required_modules=()
+  for i in "${php_modules_composer_json[@]}"; do
+    if [[ ! ${php_modules_in_base[*]} =~ $i ]]; then
+      extension_name=$(sed 's/ext\-//g;s/[^0-9 a-zA-Z]*//g;s/ //g' <<<"$i")
+      _echo "  * ${extension_name,,}"
+      required_modules+=($i)
+    fi
+  done
+
+  # @todo:
+  # * Add composer version switch
+  # * Allow to force PHP version for whatever reason
+  # * Allow to add additional php modules in case not defined in composer.json
+  # * Allow to add additional additional packages
+  IMAGE_OPTIONS[typo3_version]="${typo3_version_name}"
+  IMAGE_OPTIONS[php_version]="${php_versions_available[-1]}"
+  IMAGE_OPTIONS[php_ext_configure]="docker-php-ext-configure gd --with-freetype --with-jpeg"
+  # Set PHP version for v10.4 to at least 7.4 to circumvent issues installing PHP modules
+  if [[ "${typo3_version_input}" == v10* ]]; then
+    IMAGE_OPTIONS[php_version]="7.4"
+  fi
+
+  IMAGE_OPTIONS[php_modules]="${required_modules[@]}"
+  IMAGE_OPTIONS[name]="ochorocho/typo3-container:${typo3_version_input}"
+}
+
+function build {
+  _echo "\n⛵️Build TYPO3 version '${typo3_version_name}' as '${typo3_version_input}' docker tag" "$YELLOW"
+
+  docker build --no-cache --progress=plain . -f Dockerfile \
+    --build-arg php_version="${IMAGE_OPTIONS[php_version]}" \
+    --build-arg php_modules="${IMAGE_OPTIONS[php_modules]}" \
+    --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
+    --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
+    -t "${IMAGE_OPTIONS[name]}"
+
+  build_status=$?
+
+  if [ $build_status -eq 0 ]; then
+    _echo "🎁 Build of container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} successful" "$GREEN"
+  else
+    _echo "𐄂 Failed to build docker container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} failed" "$RED"
+    exit 1
+  fi
+}
+
+function help {
+  _echo "Help: ./t3-container [option]" "$GREEN"
+  _echo " -v\tSet a version number e.g. 12.0 or 12.1.1 .\n In case multiple versions are found the latest will be used. If not set dev-main will be used.\n The given version will also be used as docker tag name"
+  _echo " -h\tShow this help text"
+}
+
+while getopts ":v:h" opt; do
+  case $opt in
+  h)
+    help
+    exit 1
+    ;;
+  v)
+    typo3_version_input="${OPTARG}"
+    ;;
+  *)
+    _echo "Invalid option: -$OPTARG" "$RED"
+    help
+    exit 1
+    ;;
+  esac
+done
+
+requirements "$typo3_version_input"
+build
