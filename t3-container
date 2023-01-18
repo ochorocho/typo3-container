@@ -85,6 +85,14 @@ function requirements {
   fi
 
   IMAGE_OPTIONS[php_modules]="${required_modules[@]}"
+
+  if [ "$typo3_version_input" == "dev-main" ]; then
+    additional_tag="-t ochorocho/typo3-container:latest"
+  else
+    additional_tag="-t ochorocho/typo3-container:${typo3_version_name}"
+  fi
+
+  IMAGE_OPTIONS[tags]="-t ochorocho/typo3-container:${typo3_version_input} ${additional_tag}"
   IMAGE_OPTIONS[name]="ochorocho/typo3-container:${typo3_version_input}"
 }
 
@@ -96,12 +104,16 @@ function build {
     --build-arg php_modules="${IMAGE_OPTIONS[php_modules]}" \
     --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
     --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
-    -t "${IMAGE_OPTIONS[name]}" ${IMAGE_OPTIONS[push]}
+    ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
 
   build_status=$?
 
   if [ $build_status -eq 0 ]; then
     _echo "🎁 Build of container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} successful" "$GREEN"
+
+    if [ -z "${IMAGE_OPTIONS[push]}" ]; then
+      _echo "🐳 Pushed container '${IMAGE_OPTIONS[name]}' to repository, see https://hub.docker.com/repository/docker/ochorocho/typo3-container/tags" "$GREEN"
+    fi
   else
     _echo "𐄂 Failed to build container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} failed" "$RED"
     exit 1
