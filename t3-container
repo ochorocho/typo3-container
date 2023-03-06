@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# If we're running in CI we need to disable TTY allocation for docker compose
-# commands that enable it by default, such as exec and run.
-TTY=""
-if [[ ! -t 1 ]]; then
-  TTY="-T"
-fi
-
 declare -A IMAGE_OPTIONS
 
 RED='\033[0;31m'
@@ -46,36 +39,28 @@ function requirements {
   _echo "PHP version to be included:" "$GREEN"
   _echo "  * ${php_versions_available[-1]}"
 
-  # Get PHP modules set in composer.json of given "typo3_version"
-  declare -a EXT=($(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")'))
-  php_modules_composer_json=()
-  for i in "${EXT[@]}"; do
-    :
-    extension_name=$(sed 's/ext\-//g;s/[^0-9 a-zA-Z]*//g;s/ //g' <<<"$i")
-    php_modules_composer_json+=("${extension_name,,}")
-  done
+  # Get PHP modules set in composer.json of given "typo3_version" + some required modules + user input (-m option)
+  all_modules=($(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")') opcache pgsql pdo_pgsql pdo_mysql ${IMAGE_OPTIONS[additional_modules]})
+  all_unique_modules=($(printf "%s\n" "${all_modules[@]}" | sort -u | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g'))
 
   # Scrape modules from base image
   # and compare available vs. required php modules
-  # to enable on the ones not already enabled.
-  php_modules_in_base=($(docker run --rm -it php:${php_versions_available[-1]}-apache php -m))
+  # to enable only the ones not already enabled.
+  php_modules_in_base=($(docker run --rm php:${php_versions_available[-1]}-apache php -m))
 
   _echo "PHP modules to be included (excluding those already enabled):" "$GREEN"
   required_modules=()
-  for i in "${php_modules_composer_json[@]}"; do
-    if [[ ! ${php_modules_in_base[*]} =~ $i ]]; then
-      extension_name=$(sed 's/ext\-//g;s/[^0-9 a-zA-Z]*//g;s/ //g' <<<"$i")
-      _echo "  * ${extension_name,,}"
-      required_modules+=($i)
+  for module in "${all_unique_modules[@]}"; do
+    if [[ ! ${php_modules_in_base[*]} =~ (^|[[:space:]])"${module}"($|[[:space:]]) ]]; then
+      _echo "  * ${module,,}"
+      required_modules+=("$module")
     fi
   done
 
   # @todo:
   # * Add composer version switch
   # * Allow to force PHP version for whatever reason
-  # * Allow to add additional php modules in case not defined in composer.json
   # * Allow to add additional additional packages
-  # * Allow to buildx and push
   IMAGE_OPTIONS[typo3_version]="${typo3_version_name}"
   IMAGE_OPTIONS[php_version]="${php_versions_available[-1]}"
   IMAGE_OPTIONS[php_ext_configure]="docker-php-ext-configure gd --with-freetype --with-jpeg"
@@ -84,7 +69,7 @@ function requirements {
     IMAGE_OPTIONS[php_version]="7.4"
   fi
 
-  IMAGE_OPTIONS[php_modules]="${required_modules[@]}"
+  IMAGE_OPTIONS[php_modules]=${required_modules[*]}
 
   if [ "$typo3_version_input" == "dev-main" ]; then
     additional_tag="-t ochorocho/typo3-container:latest"
@@ -99,9 +84,13 @@ function requirements {
 function build {
   _echo "\n⛵️Build TYPO3 version '${typo3_version_name}' as '${typo3_version_input}' docker tag" "$YELLOW"
 
+  arg_php_modules=""
+  if [[ "${IMAGE_OPTIONS[php_modules]}" = *[!\ ]* ]]; then
+      arg_php_modules=(--build-arg "php_modules=${IMAGE_OPTIONS[php_modules]}")
+  fi
+
   docker ${IMAGE_OPTIONS[multi-buildx]} build ${IMAGE_OPTIONS[multi-platform]} --no-cache --progress=plain . -f Dockerfile \
-    --build-arg php_version="${IMAGE_OPTIONS[php_version]}" \
-    --build-arg php_modules="${IMAGE_OPTIONS[php_modules]}" \
+    --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
     --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
     --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
     ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
@@ -111,7 +100,7 @@ function build {
   if [ $build_status -eq 0 ]; then
     _echo "🎁 Build of container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} successful" "$GREEN"
 
-    if [ -z "${IMAGE_OPTIONS[push]}" ]; then
+    if [ "${IMAGE_OPTIONS[push]}" == "--push" ];  then
       _echo "🐳 Pushed container '${IMAGE_OPTIONS[name]}' to repository, see https://hub.docker.com/repository/docker/ochorocho/typo3-container/tags" "$GREEN"
     fi
   else
@@ -123,12 +112,13 @@ function build {
 function help {
   _echo "Help: ./t3-container [option]" "$GREEN"
   _echo " -v\tSet a version number e.g. 12.0 or 12.1.1 .\n In case multiple versions are found the latest will be used. If not set dev-main will be used.\n The given version will also be used as container tag name"
+  _echo " -m\tAdditional php modules to enable, e.g. '-m \"intl opcache\"'"
   _echo " -h\tShow this help text"
   _echo " -x\tBuild multi arch image (arm64, amd64)"
   _echo " -p\tPush image after build"
 }
 
-while getopts ":v:xph" opt; do
+while getopts ":v:m:xph" opt; do
   case $opt in
   h)
     help
@@ -143,6 +133,9 @@ while getopts ":v:xph" opt; do
     ;;
   p)
     IMAGE_OPTIONS[push]="--push"
+    ;;
+  m)
+    IMAGE_OPTIONS[additional_modules]="${OPTARG}"
     ;;
   *)
     _echo "Invalid option: -$OPTARG" "$RED"

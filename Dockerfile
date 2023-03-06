@@ -18,11 +18,10 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
         gnupg ca-certificates lsb-release imagemagick ghostscript libcurl4 locales-all unzip libzip4 libpq-dev \
         # Install dev packages - @todo: see if these can be removed later on
-        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev && \
+        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils && \
     $php_ext_configure && \
-    # @todo: Postgresql: apt install libpq-dev && docker-php-ext-install pgsql pdo_pgsql \
-    docker-php-ext-install opcache curl gd zip intl pgsql pdo_pgsql pdo_mysql ${php_modules} && \
     a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
+    docker-php-ext-install ${php_modules} && \
     a2ensite 000-default.conf && \
     rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
     apt-get --purge -y remove gcc cpp g++-10 icu-devtools libbrotli-dev libncurses-dev libstdc++-10-dev make binutils cpp-10 linux-libc-dev && \
