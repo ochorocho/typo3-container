@@ -10,11 +10,7 @@ jobs:
   build:
     name: Build Container
     runs-on: ubuntu-latest
-#    container:
-#      image: docker:latest
     steps:
-#      - name: Display the path
-#        run: apk add bash curl jq
       -
         name: Checkout code
         uses: actions/checkout@v3
