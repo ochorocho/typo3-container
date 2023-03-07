@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+  pull_request:
+
+jobs:
+  build:
+    name: Build Container
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v3
+      -
+        name: Docker info
+        run: docker info
+      -
+        name: "TYPO3 latest"
+        run: ./t3-container
+        shell: bash
+      -
+        name: "TYPO3 v12"
+        run: ./t3-container -v v12
+        shell: bash
+      -
+        name: "TYPO3 v11"
+        run: ./t3-container -v v11
+        shell: bash
