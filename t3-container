@@ -41,7 +41,7 @@ function requirements {
 
   # Get PHP modules set in composer.json of given "typo3_version" + some required modules + user input (-m option)
   all_modules=($(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")') opcache pgsql pdo_pgsql pdo_mysql ${IMAGE_OPTIONS[additional_modules]})
-  all_unique_modules=($(printf "%s\n" "${all_modules[@]}" | sort -u | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g'))
+  all_unique_modules=($(printf "%s\n" "${all_modules[@]}" | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g' | sort -u))
 
   # Scrape modules from base image
   # and compare available vs. required php modules
@@ -57,10 +57,6 @@ function requirements {
     fi
   done
 
-  # @todo:
-  # * Add composer version switch
-  # * Allow to force PHP version for whatever reason
-  # * Allow to add additional additional packages
   IMAGE_OPTIONS[typo3_version]="${typo3_version_name}"
   IMAGE_OPTIONS[php_version]="${php_versions_available[-1]}"
   IMAGE_OPTIONS[php_ext_configure]="docker-php-ext-configure gd --with-freetype --with-jpeg"
@@ -111,10 +107,10 @@ function build {
 
 function help {
   _echo "Help: ./t3-container [option]" "$GREEN"
-  _echo " -v\tSet a version number e.g. 12.0 or 12.1.1 .\n In case multiple versions are found the latest will be used. If not set dev-main will be used.\n The given version will also be used as container tag name"
+  _echo " -v\tSet a version number e.g. '12.0' or '12.1.1'.\n\tIn case multiple versions are found the latest will be used. If not set dev-main will be used.\n\tThe given version will also be used as container tag name"
   _echo " -m\tAdditional php modules to enable, e.g. '-m \"intl opcache\"'"
   _echo " -h\tShow this help text"
-  _echo " -x\tBuild multi arch image (arm64, amd64)"
+  _echo " -x\tBuild multi arch image (currently arm64 and amd64)"
   _echo " -p\tPush image after build"
 }
 

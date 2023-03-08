@@ -39,6 +39,7 @@ COPY config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 COPY config/composer.json /var/www/html/composer.json
 
 # Install TYPO3, so it can be used without a configured volume
+# @todo: do not run "composer install" as root
 RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP_VERSION}/${php_version}/g" /var/www/html/composer.json && \
     cd /var/www/html && \
     COMPOSER_ALLOW_SUPERUSER=1 composer install && \
