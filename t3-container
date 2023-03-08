@@ -67,13 +67,25 @@ function requirements {
 
   IMAGE_OPTIONS[php_modules]=${required_modules[*]}
 
+  additional_tag=""
   if [ "$typo3_version_input" == "dev-main" ]; then
     additional_tag="-t ochorocho/typo3-container:latest"
-  else
-    additional_tag="-t ochorocho/typo3-container:${typo3_version_name}"
   fi
 
-  IMAGE_OPTIONS[tags]="-t ochorocho/typo3-container:${typo3_version_input} ${additional_tag}"
+  verionArray=($(echo ${typo3_version_name} | tr "." "\n"))
+  versionTag=""
+  IMAGE_OPTIONS[tags]=""
+
+  for (( i=0; i<${#verionArray[@]}; i++ )); do
+    if [ "$i" -eq 0 ]; then
+      versionTag+="${verionArray[$i]}"
+    else
+      versionTag+=".${verionArray[$i]}"
+    fi
+    IMAGE_OPTIONS[tags]+="-t ochorocho/typo3-container:${versionTag} "
+  done
+
+  IMAGE_OPTIONS[tags]+="${additional_tag}"
   IMAGE_OPTIONS[name]="ochorocho/typo3-container:${typo3_version_input}"
 }
 

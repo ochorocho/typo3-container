@@ -28,6 +28,24 @@ Build a specific version `v12.1.1` (will be the image tag):
 ./t3-container -v 12.1.1
 ```
 
+## Image tags
+
+The image will be built once a day by a GitHub Action. This might change to once a week.
+Depending on how often things change. 
+
+Image version example:
+
+| Tag                    | TYPO3 version               | PHP version |
+|------------------------|-----------------------------|-------------|
+| `latest` or `dev-main` | dev-main                    | 8.1         |
+| `v12`                  | v12.x.x (latest v12)        | 8.1         |
+| `v12.2`                | v12.2.x (latest v12.2)      | 8.1         |
+| `v12.2.0`              | v12.2.1 (specific version)  | 8.1         |
+| `v11`                  | v11.x.x (latest v11)        | 8.0         |
+| `v11.5`                | v11.5.x (latest v11.5)      | 8.0         |
+| `v11.5.24`             | v11.5.24 (specific version) | 8.0         |
+| ...                    | ...                         | ...         |
+
 ## Additional `./t3-container` script options
 
 | Option | Description                                                                                                                                                                                                                                  |
