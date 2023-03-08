@@ -31,7 +31,10 @@ Build a specific version `v12.1.1` (will be the image tag):
 ## Image tags
 
 The image will be built once a day by a GitHub Action. This might change to once a week.
-Depending on how often things change. 
+Depending on how often things change.
+
+Images will be tagged depending on the requested version (`-v`).
+If the given version is `v12` tags for `v12` `v12.x` and `v12.x.x` where `x` is the latest version available on build time.
 
 Image version example:
 
@@ -54,11 +57,12 @@ Image version example:
 | -m     | Add additional PHP modules to the the build, e.g. '-m "intl opcache"'. Usually, the dependencies are read from `composer.json`. If one of the module is already available in the base image (`php:<php_version>-apache`) it will be ignored! |
 | -x     | Build multi-arch image. Currently hardcoded and set to arm64 and amd64                                                                                                                                                                       |
 | -p     | Push image after successful build                                                                                                                                                                                                            |
+| -n     | Image vendor and name e.g. `vendor/typo3-container-name` default: `ochorocho/typo3-container`                                                                                                                                                |
 
 All options example:
 
 ```bash
-./t3-container -v v12.2 -m "intl intl intl intl intl opcache opcache" -x -p
+./t3-container -v v12.2 -m "intl opcache" -n "ochorocho/typo3-container" -x -p
 ```
 
 ## Run the container
@@ -83,3 +87,4 @@ docker exec -it -u 0 <container-name> bash
   * Allow to add additional docker-ext-configure arguments
   * Create example docker-compose.yml (mysql, mariadb, postgresql)
   * Kubernetes/Helm chart
+  * Test the images. Idea: start the container image and go through the setup and see the backend.

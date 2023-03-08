@@ -16,10 +16,13 @@ jobs:
         name: Checkout code
         uses: actions/checkout@v3
       -
+        name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+      -
         name: Docker info
         run: docker info
       -
-        name: "TYPO3 latest"
+        name: "TYPO3 latest (dev-main)"
         run: ./t3-container
         shell: bash
       -

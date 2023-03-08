@@ -2,6 +2,8 @@
 
 declare -A IMAGE_OPTIONS
 
+IMAGE_OPTIONS[name]="ochorocho/typo3-container"
+
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
@@ -20,9 +22,9 @@ function requirements {
     typo3_version_name="${typo3_version_input}"
   else
     tags=$(curl -s "https://api.github.com/repos/typo3/typo3/tags?per_page=999")
-    sha=$(echo $tags | jq -r '[.[] | select(.name | contains("'${typo3_version_input}'"))][0].commit.sha')
+    sha=$(echo "$tags" | jq -r '[.[] | select(.name | contains("'"${typo3_version_input}"'"))][0].commit.sha')
     composer_json=$(curl -s "https://raw.githubusercontent.com/TYPO3/typo3/${sha}/composer.json")
-    typo3_version_name=$(echo $tags | jq -r '[.[] | select(.name | contains("'${typo3_version_input}'"))][0].name // empty')
+    typo3_version_name=$(echo "$tags" | jq -r '[.[] | select(.name | contains("'"${typo3_version_input}"'"))][0].name // empty')
   fi
 
   if [ -z "$typo3_version_name" ]; then
@@ -35,24 +37,25 @@ function requirements {
 
   # Get PHP version set in composer.json of given "typo3_version".
   # In case multiple versions are set, e.g. "7.4 || 8.0" the latest version will be used.
-  declare -a php_versions_available=($(echo $composer_json | jq '.require.php' | sed 's/[^0-9|A-Z.]*//g' | tr "||" "\n"))
+  mapfile -t php_versions_available < <(echo "$composer_json" | jq '.require.php' | sed 's/[^0-9|A-Z.]*//g' | tr "||" "\n")
   _echo "PHP version to be included:" "$GREEN"
   _echo "  * ${php_versions_available[-1]}"
 
   # Get PHP modules set in composer.json of given "typo3_version" + some required modules + user input (-m option)
-  all_modules=($(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")') opcache pgsql pdo_pgsql pdo_mysql ${IMAGE_OPTIONS[additional_modules]})
-  all_unique_modules=($(printf "%s\n" "${all_modules[@]}" | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g' | sort -u))
+  mapfile -t typo3_required_modules < <(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")')
+  mapfile -t all_modules < <(echo "${typo3_required_modules[*]} opcache pgsql pdo_pgsql pdo_mysql ${IMAGE_OPTIONS[additional_modules]}" | tr "." "\n")
+  mapfile -t all_unique_modules < <(echo "${all_modules[*]}" | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g' | sort -u)
 
   # Scrape modules from base image
   # and compare available vs. required php modules
   # to enable only the ones not already enabled.
-  php_modules_in_base=($(docker run --rm php:${php_versions_available[-1]}-apache php -m))
+  mapfile -t php_modules_in_base < <(docker run --rm php:"${php_versions_available[-1]}"-apache php -m)
 
   _echo "PHP modules to be included (excluding those already enabled):" "$GREEN"
   required_modules=()
-  for module in "${all_unique_modules[@]}"; do
-    if [[ ! ${php_modules_in_base[*]} =~ (^|[[:space:]])"${module}"($|[[:space:]]) ]]; then
-      _echo "  * ${module,,}"
+  for module in ${all_unique_modules[*]}; do
+    if [[ ! "${php_modules_in_base[*]}" =~ (^|[[:space:]])"${module}"($|[[:space:]]) ]]; then
+      _echo "  * ${module}"
       required_modules+=("$module")
     fi
   done
@@ -67,36 +70,39 @@ function requirements {
 
   IMAGE_OPTIONS[php_modules]=${required_modules[*]}
 
-  additional_tag=""
-  if [ "$typo3_version_input" == "dev-main" ]; then
-    additional_tag="-t ochorocho/typo3-container:latest"
-  fi
-
-  verionArray=($(echo ${typo3_version_name} | tr "." "\n"))
-  versionTag=""
+  mapfile -t version_array < <(echo "${typo3_version_name}" | tr "." "\n")
+  version_tag=""
   IMAGE_OPTIONS[tags]=""
 
-  for (( i=0; i<${#verionArray[@]}; i++ )); do
-    if [ "$i" -eq 0 ]; then
-      versionTag+="${verionArray[$i]}"
-    else
-      versionTag+=".${verionArray[$i]}"
-    fi
-    IMAGE_OPTIONS[tags]+="-t ochorocho/typo3-container:${versionTag} "
-  done
+  _echo "\n⛵️Docker tags to pushed to hub.docker.com" "$YELLOW"
+  if [ "$typo3_version_input" == "dev-main" ]; then
+      _echo "  * latest"
+      IMAGE_OPTIONS[tags]+="-t ochorocho/typo3-container:latest "
+  fi
 
-  IMAGE_OPTIONS[tags]+="${additional_tag}"
-  IMAGE_OPTIONS[name]="ochorocho/typo3-container:${typo3_version_input}"
+  for (( i=0; i<${#version_array[@]}; i++ )); do
+    if [ "$i" -eq 0 ]; then
+      version_tag+="${version_array[$i]}"
+    else
+      version_tag+=".${version_array[$i]}"
+    fi
+
+    if [[ ${version_tag} == "v${typo3_version_input}"* || ${version_tag} == "${typo3_version_input}"* ]]; then
+          _echo "  * ${version_tag}"
+          IMAGE_OPTIONS[tags]+="-t ochorocho/typo3-container:${version_tag} "
+    fi
+  done
 }
 
 function build {
-  _echo "\n⛵️Build TYPO3 version '${typo3_version_name}' as '${typo3_version_input}' docker tag" "$YELLOW"
+  _echo "\n⛵️Build TYPO3 version '${typo3_version_name}' ..." "$YELLOW"
 
   arg_php_modules=""
   if [[ "${IMAGE_OPTIONS[php_modules]}" = *[!\ ]* ]]; then
       arg_php_modules=(--build-arg "php_modules=${IMAGE_OPTIONS[php_modules]}")
   fi
 
+  # shellcheck disable=SC2086
   docker ${IMAGE_OPTIONS[multi-buildx]} build ${IMAGE_OPTIONS[multi-platform]} --no-cache --progress=plain . -f Dockerfile \
     --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
     --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
@@ -106,13 +112,13 @@ function build {
   build_status=$?
 
   if [ $build_status -eq 0 ]; then
-    _echo "🎁 Build of container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} successful" "$GREEN"
+    _echo "🎁 Build of container '${IMAGE_OPTIONS[name]}:${typo3_version_input}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} successful" "$GREEN"
 
     if [ "${IMAGE_OPTIONS[push]}" == "--push" ];  then
-      _echo "🐳 Pushed container '${IMAGE_OPTIONS[name]}' to repository, see https://hub.docker.com/repository/docker/ochorocho/typo3-container/tags" "$GREEN"
+      _echo "🐳 Pushed container '${IMAGE_OPTIONS[name]}:${typo3_version_input}' to repository, see https://hub.docker.com/repository/docker/ochorocho/typo3-container/tags" "$GREEN"
     fi
   else
-    _echo "𐄂 Failed to build container '${IMAGE_OPTIONS[name]}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]} failed" "$RED"
+    _echo "𐄂 Failed to build container '${IMAGE_OPTIONS[name]}:${typo3_version_input}' with TYPO3 ${IMAGE_OPTIONS[typo3_version]}" "$RED"
     exit 1
   fi
 }
@@ -126,7 +132,7 @@ function help {
   _echo " -p\tPush image after build"
 }
 
-while getopts ":v:m:xph" opt; do
+while getopts ":v:m:n:xph" opt; do
   case $opt in
   h)
     help
@@ -144,6 +150,9 @@ while getopts ":v:m:xph" opt; do
     ;;
   m)
     IMAGE_OPTIONS[additional_modules]="${OPTARG}"
+    ;;
+  n)
+    IMAGE_OPTIONS[name]="${OPTARG}"
     ;;
   *)
     _echo "Invalid option: -$OPTARG" "$RED"
