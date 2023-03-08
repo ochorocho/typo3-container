@@ -5,10 +5,11 @@ This little wrapper is used to feed the `Dockerfile` with all required
 variables (TYPO3 version, PHP modules, PHP version). PHP modules and PHP version will
 be composed of requirements found in [composer.json](https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json). 
 
-:warning: At the moment this is just an experiment! Use at your own risk. 
+:warning: At the moment this is just an experiment! But the idea is to have a production ready TYPO3 container image.
 
-This will not cover an "everyone and their dog"-setup. 
-It is more of a base image to start with TYPO3 and Docker.
+    For now this will not cover an "everyone and their dog"-setup.
+    It is more of a base image to start with TYPO3 and Docker and try to
+    provide more and more stuff as we go.
 
 ## Build a image
 
@@ -33,7 +34,7 @@ Build a specific version `v12.1.1` (will be the image tag):
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | -v     | TYPO3 version to use. If set to 'v12.2' the latest version of 'v12.2.x' will be picked and both versions are tagged                                                                                                                          |
 | -m     | Add additional PHP modules to the the build, e.g. '-m "intl opcache"'. Usually, the dependencies are read from `composer.json`. If one of the module is already available in the base image (`php:<php_version>-apache`) it will be ignored! |
-| -x     | Build mutli-arch image. Currently hardcoded and set to arm64 and amd64                                                                                                                                                                       |
+| -x     | Build multi-arch image. Currently hardcoded and set to arm64 and amd64                                                                                                                                                                       |
 | -p     | Push image after successful build                                                                                                                                                                                                            |
 
 All options example:
@@ -43,6 +44,8 @@ All options example:
 ```
 
 ## Run the container
+
+The container comes with TYPO3 preinstalled in `/var/www/html`. So you can issue a single command to run TYPO3:
 
 ```
 docker run -d --name <container-name> -p 3333:80 ochorocho/typo3-container:v12 
@@ -60,5 +63,5 @@ docker exec -it -u 0 <container-name> bash
   * Allow to force PHP version
   * Allow to add additional packages
   * Allow to add additional docker-ext-configure arguments
-  * Create example docker-compose.yml
+  * Create example docker-compose.yml (mysql, mariadb, postgresql)
   * Kubernetes/Helm chart
