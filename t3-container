@@ -108,7 +108,6 @@ function build {
     --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
     --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
     --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
-    --output type=oci \
     ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
 
   build_status=$?
