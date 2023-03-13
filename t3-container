@@ -100,15 +100,22 @@ function build {
 
   arg_php_modules=""
   if [[ "${IMAGE_OPTIONS[php_modules]}" = *[!\ ]* ]]; then
-      arg_php_modules=(--build-arg "php_modules=${IMAGE_OPTIONS[php_modules]}")
+      arg_php_modules=("${IMAGE_OPTIONS[php_modules]}")
   fi
 
   # shellcheck disable=SC2086
-  docker ${IMAGE_OPTIONS[multi-buildx]} build ${IMAGE_OPTIONS[multi-platform]} --no-cache --progress=plain . -f Dockerfile \
-    --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
-    --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
-    --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
-    ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
+  packer build \
+    -warn-on-undeclared-var \
+    -var "php_version=${IMAGE_OPTIONS[php_version]}" \
+    -var "typo3_version=${IMAGE_OPTIONS[typo3_version]}" \
+    -var "php_modules=${arg_php_modules[*]}" \
+    -var "php_ext_configure=${IMAGE_OPTIONS[php_ext_configure]}" .
+
+#  docker ${IMAGE_OPTIONS[multi-buildx]} build ${IMAGE_OPTIONS[multi-platform]} --no-cache --progress=plain . -f Dockerfile \
+#    --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
+#    --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
+#    --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
+#    ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
 
   build_status=$?
 
