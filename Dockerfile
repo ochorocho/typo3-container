@@ -16,9 +16,8 @@ COPY config/apache-typo3.conf /etc/apache2/sites-available/000-default.conf
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-        gnupg ca-certificates lsb-release imagemagick ghostscript libcurl4 locales-all unzip libzip4 libpq-dev \
-        # Install dev packages - @todo: see if these can be removed later on
-        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils && \
+        gnupg ca-certificates lsb-release imagemagick ghostscript libcurl4 locales-all unzip libzip4 libpq-dev locales-all \
+        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils gcc && \
     $php_ext_configure && \
     a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
     docker-php-ext-install gd ${php_modules} && \

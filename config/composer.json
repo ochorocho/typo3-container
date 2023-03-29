@@ -36,6 +36,14 @@
     "typo3/cms-sys-note": "{TYPO3_VERSION}",
     "typo3/cms-t3editor": "{TYPO3_VERSION}",
     "typo3/cms-tstemplate": "{TYPO3_VERSION}",
-    "typo3/cms-viewpage": "{TYPO3_VERSION}"
+    "typo3/cms-viewpage": "{TYPO3_VERSION}",
+    "typo3/cms-webhooks": "{TYPO3_VERSION}",
+    "typo3/cms-reactions": "{TYPO3_VERSION}",
+    "typo3/cms-adminpanel": "{TYPO3_VERSION}",
+    "typo3/cms-linkvalidator": "{TYPO3_VERSION}",
+    "typo3/cms-recycler": "{TYPO3_VERSION}",
+    "typo3/cms-redirects": "{TYPO3_VERSION}",
+    "typo3/cms-scheduler": "{TYPO3_VERSION}",
+    "typo3/cms-workspaces": "{TYPO3_VERSION}"
   }
 }
