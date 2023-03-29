@@ -37,13 +37,13 @@ jobs:
           platforms: linux/amd64,linux/arm64
       -
         name: "TYPO3 latest (dev-main)"
-        run: ./t3-container -x -p
+        run: ./t3-container -x -p -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
         shell: bash
       -
         name: "TYPO3 v12"
-        run: ./t3-container -v v12 -x -p
+        run: ./t3-container -x -p -v v12 -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
         shell: bash
       -
         name: "TYPO3 v11"
-        run: ./t3-container -v v11 -x -p
+        run: ./t3-container -x -p -v v11
         shell: bash
