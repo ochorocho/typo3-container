@@ -43,7 +43,10 @@ function requirements {
 
   # Get PHP modules set in composer.json of given "typo3_version" + some required modules + user input (-m option)
   mapfile -t typo3_required_modules < <(echo "$composer_json" | jq -r -j '.require | to_entries | map(select(.key | startswith("ext-")) | .key) | join("\n")')
-  mapfile -t all_modules < <(echo "${typo3_required_modules[*]} opcache pgsql pdo_pgsql pdo_mysql ${IMAGE_OPTIONS[additional_modules]}" | tr "." "\n")
+  # Some additional/suggested modules. Though, the modules are not required but only suggested
+  # the packages are needed to have a fully working TYPO3 installation
+  mapfile -t typo3_suggested_modules < <(echo "zip opcache pgsql pdo_pgsql pdo_mysql mysqli openssl zlib")
+  mapfile -t all_modules < <(echo "${typo3_required_modules[*]} ${typo3_suggested_modules[*]}  ${IMAGE_OPTIONS[additional_modules]}" | tr "." "\n")
   mapfile -t all_unique_modules < <(echo "${all_modules[*]}" | sed 's/ext\-//g;s/[^0-9 a-zA-Z_]*//g;s/  / /g' | sort -u)
 
   # Scrape modules from base image
