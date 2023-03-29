@@ -111,6 +111,7 @@ function build {
     --build-arg php_version="${IMAGE_OPTIONS[php_version]}" "${arg_php_modules[@]}" \
     --build-arg typo3_version="${IMAGE_OPTIONS[typo3_version]}" \
     --build-arg php_ext_configure="${IMAGE_OPTIONS[php_ext_configure]}" \
+    --build-arg composer_packages_command="${IMAGE_OPTIONS[composer_packages_command]}" \
     ${IMAGE_OPTIONS[tags]} ${IMAGE_OPTIONS[push]}
 
   build_status=$?
@@ -134,9 +135,10 @@ function help {
   _echo " -h\tShow this help text"
   _echo " -x\tBuild multi arch image (currently arm64 and amd64)"
   _echo " -p\tPush image after build"
+  _echo " -c\tAdditional composer packages e.g. '-c \"typo3/cms-webhooks:^12 typo3/cms-reactions:^12\"'"
 }
 
-while getopts ":v:m:n:xph" opt; do
+while getopts ":v:m:n:c:xph" opt; do
   case $opt in
   h)
     help
@@ -157,6 +159,9 @@ while getopts ":v:m:n:xph" opt; do
     ;;
   n)
     IMAGE_OPTIONS[name]="${OPTARG}"
+    ;;
+  c)
+    IMAGE_OPTIONS[composer_packages_command]="composer req ${OPTARG}"
     ;;
   *)
     _echo "Invalid option: -$OPTARG" "$RED"
