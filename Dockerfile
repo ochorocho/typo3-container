@@ -21,7 +21,7 @@ RUN apt-get update && \
         libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils && \
     $php_ext_configure && \
     a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
-    docker-php-ext-install ${php_modules} && \
+    docker-php-ext-install gd ${php_modules} && \
     a2ensite 000-default.conf && \
     rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
     apt-get --purge -y remove gcc cpp g++-10 icu-devtools libbrotli-dev libncurses-dev libstdc++-10-dev make binutils cpp-10 linux-libc-dev && \
