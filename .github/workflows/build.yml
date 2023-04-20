@@ -41,6 +41,7 @@ jobs:
         shell: bash
       -
         name: "TYPO3 v12"
+        # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in < v12
         run: ./t3-container -x -p -v v12 -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
         shell: bash
       -

@@ -23,11 +23,12 @@ jobs:
         run: docker info
       -
         name: "TYPO3 latest (dev-main)"
-        run: ./t3-container
+        run: ./t3-container -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
         shell: bash
       -
         name: "TYPO3 v12"
-        run: ./t3-container -v v12
+        # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in older versions
+        run: ./t3-container -v v12 -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
         shell: bash
       -
         name: "TYPO3 v11"
