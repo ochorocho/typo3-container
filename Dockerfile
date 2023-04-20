@@ -42,8 +42,8 @@ COPY config/composer.json /var/www/html/composer.json
 # @todo: do not run "composer install" as root
 RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP_VERSION}/${php_version}/g" /var/www/html/composer.json && \
     cd /var/www/html && \
-    COMPOSER_ALLOW_SUPERUSER=1 composer install && \
-    $composer_packages_command && \
+    COMPOSER_ALLOW_SUPERUSER=1 composer install --optimize-autoloader && \
+    COMPOSER_ALLOW_SUPERUSER=1 $composer_packages_command && \
     touch /var/www/html/public/FIRST_INSTALL&& \
     rm -Rf /root/.composer/* && \
     chown -R www-data:www-data /var/www/html

@@ -161,7 +161,7 @@ while getopts ":v:m:n:c:xph" opt; do
     IMAGE_OPTIONS[name]="${OPTARG}"
     ;;
   c)
-    IMAGE_OPTIONS[composer_packages_command]="composer req ${OPTARG}"
+    IMAGE_OPTIONS[composer_packages_command]="composer require ${OPTARG} --optimize-autoloader"
     ;;
   *)
     _echo "Invalid option: -$OPTARG" "$RED"
