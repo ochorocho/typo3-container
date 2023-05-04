@@ -21,6 +21,9 @@ RUN apt-get update && \
         libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils gcc && \
     $php_ext_configure && \
     a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
+    # Unattended install of the redis module
+    echo '' | pecl install redis && \
+    docker-php-ext-enable redis && \
     docker-php-ext-install gd ${php_modules} && \
     a2ensite 000-default.conf && \
     rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
