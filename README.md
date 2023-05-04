@@ -83,8 +83,5 @@ docker exec -it -u 0 <container-name> bash
 
   * Add composer version switch
   * Allow to force PHP version
-  * Allow to add additional packages
-  * Allow to add additional docker-ext-configure arguments
-  * Create example docker-compose.yml (mysql, mariadb, postgresql)
   * Kubernetes/Helm chart
   * Test the images. Idea: start the container image and go through the setup and see the backend.

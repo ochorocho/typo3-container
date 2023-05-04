@@ -21,6 +21,9 @@ RUN apt-get update && \
         libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils gcc && \
     $php_ext_configure && \
     a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
+    # Unattended install of the redis module
+    echo '' | pecl install redis && \
+    docker-php-ext-enable redis && \
     docker-php-ext-install gd ${php_modules} && \
     a2ensite 000-default.conf && \
     rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
@@ -46,6 +49,9 @@ RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP
     COMPOSER_ALLOW_SUPERUSER=1 $composer_packages_command && \
     touch /var/www/html/public/FIRST_INSTALL&& \
     rm -Rf /root/.composer/* && \
+    # Ensure folders exist to avoid permission problems
+    mkdir -p /var/www/html/config && \
+    mkdir -p /var/www/html/public/fileadmin && \
     chown -R www-data:www-data /var/www/html
 
 USER www-data
