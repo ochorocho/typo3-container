@@ -1,0 +1,22 @@
+{
+    "name": "ochorocho/t3-container",
+    "type": "project",
+    "license": "GPL-2.0",
+    "bin": ["bin/t3-container"],
+    "autoload": {
+        "psr-4": {
+            "Ochorocho\\T3Container\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ochorocho",
+            "email": "jochen.roth@b13.com"
+        }
+    ],
+    "require": {
+        "symfony/console": "^6.2",
+        "symfony/http-client": "^6.2",
+        "composer/composer": "^2.5"
+    }
+}
