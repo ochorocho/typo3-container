@@ -16,21 +16,21 @@ jobs:
         name: Checkout code
         uses: actions/checkout@v3
       -
-        name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        name: Install composer
+        uses: php-actions/composer@v6
       -
         name: Docker info
         run: docker info
       -
         name: "TYPO3 latest (dev-main)"
-        run: ./t3-container -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
+        run: ./bin/t3-container container:build ochorocho/typo3-container dev-main -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
         shell: bash
       -
         name: "TYPO3 v12"
         # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in older versions
-        run: ./t3-container -v v12 -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
+        run: ./bin/t3-container container:build ochorocho/typo3-container v12 -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
         shell: bash
       -
         name: "TYPO3 v11"
-        run: ./t3-container -v v11
+        run:  ./bin/t3-container container:build ochorocho/typo3-container v11
         shell: bash
