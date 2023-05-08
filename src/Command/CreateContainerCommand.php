@@ -107,7 +107,7 @@ class CreateContainerCommand extends Command
 
         if (!empty($composerPackages)) {
             $command[] = '--build-arg';
-            $command[] = 'composer_packages_command="' . implode(' ', $composerPackages) . '"';
+            $command[] = 'composer_packages_command=composer req ' . implode(' ', $composerPackages);
         }
 
         $command += $tagOption;
