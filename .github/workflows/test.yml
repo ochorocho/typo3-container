@@ -32,13 +32,13 @@ jobs:
       -
         name: "TYPO3 latest (dev-main)"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container container:build ochorocho/typo3-container dev-main -x -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
+        run: ./bin/t3-container build ochorocho/typo3-container dev-main -x -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
       -
         name: "TYPO3 v12"
         shell: 'script -q -e -c "bash {0}"'
         # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in older versions
-        run: ./bin/t3-container container:build ochorocho/typo3-container v12 -x -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
+        run: ./bin/t3-container build ochorocho/typo3-container v12 -x -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
       -
         name: "TYPO3 v11"
         shell: 'script -q -e -c "bash {0}"'
-        run:  ./bin/t3-container container:build ochorocho/typo3-container v11 -x
+        run:  ./bin/t3-container build ochorocho/typo3-container v11 -x

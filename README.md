@@ -15,17 +15,17 @@ be composed of requirements found in [composer.json](https://raw.githubuserconte
 
 Build `dev-main`:
 ```
-./t3-container
+./bin/t3-container build ochorocho/typo3-container dev-main
 ```
 
 Build `v12.1` (will be the image tag) which will pick the latest release of `v12.1.x` :
 ```
-./t3-container -v 12.1
+./bin/t3-container build ochorocho/typo3-container 12.1
 ```
 
 Build a specific version `v12.1.1` (will be the image tag):
 ```
-./t3-container -v 12.1.1
+./bin/t3-container build ochorocho/typo3-container 12.1.1
 ```
 
 ## Image tags
@@ -49,20 +49,36 @@ Image version example:
 | `v11.5.24`             | v11.5.24 (specific version) | 8.0         |
 | ...                    | ...                         | ...         |
 
-## Additional `./t3-container` script options
+
+## Minimal command
+
+```bash
+./bin/t3-container build <container-name> <version>
+````
+
+## Command arguments
+
+| Argument         | Description                                                                                                         |
+|------------------|---------------------------------------------------------------------------------------------------------------------|
+| <container-name> | The container name, e.g. `ochorocho/typo3-container`                                                                |
+| <version>        | TYPO3 version to use. If set to 'v12.2' the latest version of 'v12.2.x' will be picked and both versions are tagged |
+
+
+## Command options
 
 | Option | Description                                                                                                                                                                                                                                  |
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -v     | TYPO3 version to use. If set to 'v12.2' the latest version of 'v12.2.x' will be picked and both versions are tagged                                                                                                                          |
+| -x     | Build multi-arch image                                                                                                                                                                                                                       |
+| -p     | Push image to docker hub after successful build                                                                                                                                                                                              |
 | -m     | Add additional PHP modules to the the build, e.g. '-m "intl opcache"'. Usually, the dependencies are read from `composer.json`. If one of the module is already available in the base image (`php:<php_version>-apache`) it will be ignored! |
-| -x     | Build multi-arch image. Currently hardcoded and set to arm64 and amd64                                                                                                                                                                       |
-| -p     | Push image after successful build                                                                                                                                                                                                            |
-| -n     | Image vendor and name e.g. `vendor/typo3-container-name` default: `ochorocho/typo3-container`                                                                                                                                                |
+| -c     | Add additional composer packages, e.g. '-c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"'                                                                                                                                       |
+| -e     | Container engine to use for building the image. Possible values are "docker" or "podman"                                                                                                                                                     |
+| -a     | Architectures to build, e.g "-a linux/arm64 -a linux/amd64".                                                                                                                                                                                 |
 
 All options example:
 
 ```bash
-./t3-container -v v12.2 -m "intl opcache" -n "ochorocho/typo3-container" -x -p
+./bin/t3-container build ochorocho/typo3-container dev-main -m "intl opcache" -e podman -a linux/arm64 -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main" -x -p
 ```
 
 ## Run the container
