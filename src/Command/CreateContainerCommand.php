@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
-#[AsCommand(name: 'container:build')]
+#[AsCommand(name: 'build')]
 class CreateContainerCommand extends Command
 {
     protected static $defaultDescription = 'Build a docker container for TYPO3.';
