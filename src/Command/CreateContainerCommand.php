@@ -110,12 +110,13 @@ class CreateContainerCommand extends Command
             $command[] = 'composer_packages_command=composer req ' . implode(' ', $composerPackages);
         }
 
-        $command += $tagOption;
-
         if($input->getOption('push')) {
             $command[] = '--push';
         }
-        $process = new Process($command);
+
+        $finalCommand = array_merge($command, $tagOption);
+
+        $process = new Process($finalCommand);
         $process->setTty(1);
         $process->setTimeout(null);
         $process->setIdleTimeout(3600);
@@ -130,6 +131,8 @@ class CreateContainerCommand extends Command
         if(!$process->isSuccessful()) {
             $output->writeln($process->getErrorOutput());
             $output->writeln('<error>𐄂 Failed to build container '. $imageName . ':' . $version . ' with TYPO3 ' . $version .'</error>');
+
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;
