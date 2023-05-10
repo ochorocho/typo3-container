@@ -49,6 +49,9 @@ RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP
     COMPOSER_ALLOW_SUPERUSER=1 $composer_packages_command && \
     touch /var/www/html/public/FIRST_INSTALL&& \
     rm -Rf /root/.composer/* && \
+    # Ensure folders exist to avoid permission problems
+    mkdir -p /var/www/html/config && \
+    mkdir -p /var/www/html/public/fileadmin && \
     chown -R www-data:www-data /var/www/html
 
 USER www-data

@@ -1,0 +1,63 @@
+version: "3"
+
+services:
+  web:
+    image: "ochorocho/typo3-container:latest"
+    depends_on:
+      - db
+    restart: "unless-stopped"
+    volumes:
+      # @todo: find a better way to mount minimal folders
+      - web-fileadmin:/var/www/html/public/fileadmin:rw
+      - web-config:/var/www/html/config:rw
+    ports:
+      - '8080:80'
+    links:
+      - db
+    command:
+      - composer install
+
+  # MariaDB
+  db:
+    image: "mariadb:10.7"
+    restart: 'unless-stopped'
+    volumes:
+      - db-data:/var/lib/mysql/data
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+
+volumes:
+  db-data:
+  web-fileadmin:
+  web-config:
+
+#  # MySQL
+#  db:
+#    image: "mysql:8.0"
+#    restart: "unless-stopped"
+#    volumes:
+#      - db-data:/var/lib/mysql/data
+#    environment:
+#      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+#      MYSQL_DATABASE: "${DB_DATABASE}"
+#      MYSQL_USER: "${DB_USER}"
+#      MYSQL_PASSWORD: "${DB_PASSWORD}"
+
+#  # PostgreSQL
+#  db:
+#    image: "postgres:15.2"
+#    restart: "unless-stopped"
+#    volumes:
+#      - db-data:/var/lib/postgresql/data
+#    environment:
+#      POSTGRES_DB: "${DB_DATABASE}"
+#      POSTGRES_USER: "${DB_USER}"
+#      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+
+#  # Redis - For configuration see https://b13.com/blog/caching-in-typo3-part-3#c2594
+#  caching:
+#    image: "redis:7"
+#    restart: 'always'
