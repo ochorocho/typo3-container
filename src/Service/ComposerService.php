@@ -4,9 +4,6 @@ namespace Ochorocho\T3Container\Service;
 
 use Composer\Package\Version\VersionParser;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -43,13 +40,29 @@ class ComposerService
 
         // PHP Version to install
         $installablePhpVersion = $this->getPhpVersionFromComposer($composerJson);
-        $phpModules = $this->getPhpModulesFromComposer($composerJson, $installablePhpVersion, $additionalPhpModules);
+        $phpModules = $this->getPhpModulesFromComposer($composerJson, $additionalPhpModules);
 
         return [
             'php' => $installablePhpVersion,
             'modules' => $phpModules,
             'tags' => $this->getVersionTags($versionName, $version)
         ];
+    }
+
+    /**
+     * Get all available php modules available
+     * for a given php version and debian version
+     *
+     * The overall goal is to determine modules to install.
+     * If a package is found it is not a default module and
+     * it needs to be installed.
+     */
+    public function packagesInRepository(string $phpVersion, string $debianVersion): array
+    {
+        $releaseFile = $this->client->request('GET', 'https://packages.sury.org/php/dists/' . $debianVersion . '/main/binary-arm64/Packages')->getContent();
+        preg_match_all('/^Package: php' . $phpVersion . '-(.*)$/m', $releaseFile, $matches);
+
+        return $matches[1] ?? [];
     }
 
     /**
@@ -80,11 +93,10 @@ class ComposerService
      * Get all PHP modules
      * - Read modules from composer
      * - Add necessary modules not defined in composer
-     * - Remove all modules from array already contained in the php available in the docker image
      */
-    private function getPhpModulesFromComposer(array $json, string $phpVersion, array $additionalPhpModules = []): array
+    private function getPhpModulesFromComposer(array $json, array $additionalPhpModules = []): array
     {
-        $modules = ["zip", "opcache", "pgsql", "pdo_pgsql", "pdo_mysql", "mysqli", "openssl", "zlib"];
+        $modules = ["zip", "opcache", "pgsql", "mysql", "mysqli", "openssl", "zlib"];
         $modules += $additionalPhpModules;
         foreach ($json['require'] as $key => $value) {
             if($key !== 'ext-PDO' && str_starts_with($key, 'ext-')) {
@@ -92,21 +104,7 @@ class ComposerService
             }
         }
 
-        $executableFinder = new ExecutableFinder();
-        $binary = $executableFinder->find('docker');
-        $command = [$binary, 'run', '--rm', 'php:'. $phpVersion . '-apache', 'php', '-m'];
-        $process = new Process($command);
-        $process->run();
-
-        if ($process->isSuccessful()) {
-            $phpModulesInContainer = explode("\n", $process->getOutput());
-        } else {
-            throw new ProcessFailedException($process);
-        }
-
-        return array_filter($modules, function ($value) use ($phpModulesInContainer) {
-            return !in_array($value, $phpModulesInContainer);
-        });
+        return $modules;
     }
 
     private function getVersionTags($detectedVersion, $version): array
