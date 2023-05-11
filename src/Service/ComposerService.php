@@ -96,7 +96,7 @@ class ComposerService
      */
     private function getPhpModulesFromComposer(array $json, array $additionalPhpModules = []): array
     {
-        $modules = ["zip", "opcache", "pgsql", "mysql", "mysqli", "openssl", "zlib"];
+        $modules = ['zip', 'zlib', 'opcache', 'pgsql', 'mysql', 'mysqli', 'openssl', 'gd', 'apcu', 'fileinfo'];
         $modules += $additionalPhpModules;
         foreach ($json['require'] as $key => $value) {
             if($key !== 'ext-PDO' && str_starts_with($key, 'ext-')) {

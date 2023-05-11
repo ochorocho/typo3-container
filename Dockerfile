@@ -39,7 +39,7 @@ RUN apt-get update && \
     touch /var/www/html/public/FIRST_INSTALL && \
     chown -R www-data:www-data /var/www/html && \
     # Cleanup
-    apt-get --purge -y remove python3.9 libzip4 && \
+    apt-get --purge -y remove python3.9 apt-utils && \
     apt-get -y autoremove && \
     rm -Rf /root/.composer/* && \
     rm -Rf /root/config/* && \
