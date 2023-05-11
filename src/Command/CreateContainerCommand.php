@@ -27,6 +27,7 @@ class CreateContainerCommand extends Command
         $this->addOption('composer-packages', 'c', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional composer packages.');
         $this->addOption('platforms', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'List of platform architectures to build.', ['linux/arm64','linux/amd64']);
         $this->addOption('container-engine', 'e', InputOption::VALUE_OPTIONAL, 'Choose a container engine for building the image (supported: docker, podman)', 'docker');
+        $this->addOption('debian-version', 'd', InputOption::VALUE_OPTIONAL, 'The debian version (codename) to use as base image e.g. bullseye', 'bullseye');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -35,6 +36,7 @@ class CreateContainerCommand extends Command
         $imageName = $input->getArgument('image-name');
         $composerPackages = $input->getOption('composer-packages');
         $engine = $input->getOption('container-engine');
+        $debianVersion = $input->getOption('debian-version');
         $allowedEngines = ['docker', 'podman'];
         if(!in_array($engine, $allowedEngines, true)) {
             $output->writeln('<error>❌ Unknown container engine' . $engine .'. Engines available: ' . implode(', ', $allowedEngines) . '</error>');
@@ -43,8 +45,16 @@ class CreateContainerCommand extends Command
 
         $composerService = new ComposerService();
         $requirements = $composerService->getRequirements($version, $input->getOption('php-modules'));
-        $phpModules = $requirements['modules'];
         $phpVersion = $requirements['php'];
+
+        $availableModules = $composerService->packagesInRepository($phpVersion, $debianVersion);
+        $phpModules = [];
+        foreach ($requirements['modules'] as $module) {
+            if(in_array($module, $availableModules, true)) {
+                $phpModules[] = 'php' . $phpVersion . '-' . $module;
+            }
+        }
+
         $tags = $requirements['tags'];
 
         // Image tags, option: -t
@@ -94,6 +104,8 @@ class CreateContainerCommand extends Command
         $command[] = '-f';
         $command[] = 'Dockerfile';
 
+        $command[] = '--build-arg';
+        $command[] = 'debian_version=' . $debianVersion;
         $command[] = '--build-arg';
         $command[] = 'php_version=' . $phpVersion;
         $command[] = '--build-arg';
