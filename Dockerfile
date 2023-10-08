@@ -38,7 +38,6 @@ COPY config/php.ini /usr/local/etc/php/conf.d/php.ini
 
 # Allow ImageMagick 6 to read/write pdf files
 COPY config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
-
 COPY config/composer.json /var/www/html/composer.json
 
 # Install TYPO3, so it can be used without a configured volume
