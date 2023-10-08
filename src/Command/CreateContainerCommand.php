@@ -23,6 +23,7 @@ class CreateContainerCommand extends Command
         $this->addArgument('version', InputArgument::REQUIRED, 'TYPO3 version to build.');
         $this->addOption('buildx', 'x', InputOption::VALUE_NONE, 'Build multiarch image.');
         $this->addOption('push', 'p', InputOption::VALUE_NONE, 'Push image to repository after the build has finished.');
+        $this->addOption('load', 'l', InputOption::VALUE_NONE, 'Load image into docker.');
         $this->addOption('php-modules', 'm', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional PHP modules.');
         $this->addOption('composer-packages', 'c', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional composer packages.');
         $this->addOption('platforms', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'List of platform architectures to build.', ['linux/arm64','linux/amd64']);
@@ -110,6 +111,10 @@ class CreateContainerCommand extends Command
 
         if($input->getOption('push')) {
             $command[] = '--push';
+        }
+
+        if($input->getOption('load')) {
+            $command[] = '--load';
         }
 
         $finalCommand = array_merge($command, $tagOption);

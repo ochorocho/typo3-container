@@ -27,7 +27,7 @@ RUN apt-get update && \
     docker-php-ext-install gd ${php_modules} && \
     a2ensite 000-default.conf && \
     rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
-    apt-get --purge -y remove gcc cpp g++-10 icu-devtools libbrotli-dev libncurses-dev libstdc++-10-dev make binutils cpp-10 linux-libc-dev && \
+    apt-get --purge -y remove gcc cpp g++-* icu-devtools libbrotli-dev libncurses-dev libstdc++-*-dev make binutils cpp-* linux-libc-dev && \
     apt-get -y autoremove
 
 # Add composer
@@ -50,8 +50,6 @@ RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP
     touch /var/www/html/public/FIRST_INSTALL&& \
     rm -Rf /root/.composer/* && \
     chown -R www-data:www-data /var/www/html
-
-USER www-data
 
 # @todo: Cleanup packages and minimize image size
 
