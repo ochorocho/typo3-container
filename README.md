@@ -66,20 +66,20 @@ Image version example:
 
 ## Command options
 
-| Option | Description                                                                                                                                                                                                                                  |
-|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -x     | Build multi-arch image                                                                                                                                                                                                                       |
-| -p     | Push image to docker hub after successful build                                                                                                                                                                                              |
-| -l     | Load image into docker                                                                                                                                                                                                                       |
-| -m     | Add additional PHP modules to the the build, e.g. '-m "intl opcache"'. Usually, the dependencies are read from `composer.json`. If one of the module is already available in the base image (`php:<php_version>-apache`) it will be ignored! |
-| -c     | Add additional composer packages, e.g. '-c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"'                                                                                                                                       |
-| -e     | Container engine to use for building the image. Possible values are "docker" or "podman"                                                                                                                                                     |
-| -a     | Architectures to build, e.g "-a linux/arm64 -a linux/amd64".                                                                                                                                                                                 |
+| Option | Description                                                                                                                                                                                                                                   |
+|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --php  | Specify PHP version (If not set the lower bound defined in composer.json will be used)                                                                                                                                                        |
+| -x     | Build multi-arch image                                                                                                                                                                                                                        |
+| -p     | Push image to docker hub after successful build                                                                                                                                                                                               |
+| -l     | Load image into docker                                                                                                                                                                                                                        |
+| -m     | Add additional PHP modules to the the build, e.g. '-m "intl opcache"'. Usually, the dependencies are read from `composer.json`. If one of the modules is already available in the base image (`php:<php_version>-apache`) it will be ignored! |
+| -e     | Container engine to use for building the image. Possible values are "docker" or "podman"                                                                                                                                                      |
+| -a     | Architectures to build, e.g "-a linux/arm64 -a linux/amd64".                                                                                                                                                                                  |
 
 All options example:
 
 ```bash
-./bin/t3-container build ochorocho/typo3-container dev-main -m "intl opcache" -e podman -a linux/arm64 -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main" -x -p
+./bin/t3-container build ochorocho/typo3-container dev-main -m "intl opcache" -e podman -a linux/arm64 -x -p
 ```
 
 ## Run the container

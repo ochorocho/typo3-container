@@ -1,55 +1,56 @@
 # Include ARG before anything else, so the ARG is available for FROM. After from ARGs are reset!
 ARG php_version
-FROM php:${php_version}-apache
+FROM php:${php_version}-fpm
 
 # To ensure the variables are available for the rest of the
 # script due to the fact FROM does reset all ARGs
 ARG php_version
 ARG php_modules
-ARG typo3_version
 ARG php_ext_configure
-ARG composer_packages_command
+
+ENV PHP_CONFIGURATION="# Default empty"
+
+# Timezone to be used within the container
+ENV TZ="UTC"
 
 USER root
 
-# Apache config for TYPO3
-COPY config/apache-typo3.conf /etc/apache2/sites-available/000-default.conf
-
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-        gnupg ca-certificates lsb-release imagemagick ghostscript libcurl4 locales-all unzip libzip4 libpq-dev locales-all \
-        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev apt-utils gcc && \
+        imagemagick ghostscript locales-all libzip4 libpq-dev \
+        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev && \
     $php_ext_configure && \
-    a2enmod alias authz_core autoindex deflate expires filter headers setenvif rewrite && \
     # Unattended install of the redis module
     echo '' | pecl install redis && \
     docker-php-ext-enable redis && \
     docker-php-ext-install gd ${php_modules} && \
-    a2ensite 000-default.conf && \
-    rm -rf /var/cache/apt/* /var/cache/debconf/* /var/log/dpkg.log && \
-    apt-get --purge -y remove gcc cpp g++-* icu-devtools libbrotli-dev libncurses-dev libstdc++-*-dev make binutils cpp-* linux-libc-dev && \
-    apt-get -y autoremove
+    rm -rf /var/cache/apt/* /var/log/* /var/lib/apt/* /usr/share/doc/* && \
+    apt-get --purge -y remove gcc cpp g++-* icu-devtools libncurses-dev libstdc++-*-dev make binutils cpp-* linux-libc-dev apt-utils \
+    binutils-common && \
+    apt-get clean && \
+    apt-get -y autoremove && \
+    apt-get autoclean
 
 # Add composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer && \
+    mkdir /app && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# RUN echo "security.limit_extensions = .php .html" >> /usr/local/etc/php-fpm.d/www.conf
+
+#COPY ./config/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Configure PHP
-COPY config/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY config/typo3.ini /usr/local/etc/php/conf.d/typo3.ini
 
 # Allow ImageMagick 6 to read/write pdf files
 COPY config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
-COPY config/composer.json /var/www/html/composer.json
 
-# Install TYPO3, so it can be used without a configured volume
-# @todo: do not run "composer install" as root
-RUN sed -i "s/{TYPO3_VERSION}/^${typo3_version}/g;s/\^dev-main/dev-main/g;s/{PHP_VERSION}/${php_version}/g" /var/www/html/composer.json && \
-    cd /var/www/html && \
-    COMPOSER_ALLOW_SUPERUSER=1 composer install --optimize-autoloader && \
-    COMPOSER_ALLOW_SUPERUSER=1 $composer_packages_command && \
-    touch /var/www/html/public/FIRST_INSTALL&& \
-    rm -Rf /root/.composer/* && \
-    chown -R www-data:www-data /var/www/html
+# Seriously?!
+RUN mkdir /builds && chown -R www-data:www-data /usr/local/etc/php/conf.d/ && chmod -R 777 /usr/local/etc/php/conf.d
 
-# @todo: Cleanup packages and minimize image size
+# USER www-data
 
-WORKDIR /var/www/html
+WORKDIR /builds/
+
+CMD ["/bin/sh", "-c", "echo \"$PHP_CONFIGURATION\" >> /usr/local/etc/php/conf.d/typo3.ini && php-fpm --allow-to-run-as-root"]

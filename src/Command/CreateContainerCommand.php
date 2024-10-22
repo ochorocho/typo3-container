@@ -24,8 +24,9 @@ class CreateContainerCommand extends Command
         $this->addOption('buildx', 'x', InputOption::VALUE_NONE, 'Build multiarch image.');
         $this->addOption('push', 'p', InputOption::VALUE_NONE, 'Push image to repository after the build has finished.');
         $this->addOption('load', 'l', InputOption::VALUE_NONE, 'Load image into docker.');
+        $this->addOption('no-cache', 'nc', InputOption::VALUE_NONE, 'Build image without cache.');
+        $this->addOption('php', null, InputOption::VALUE_OPTIONAL, 'Specify PHP version.');
         $this->addOption('php-modules', 'm', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional PHP modules.');
-        $this->addOption('composer-packages', 'c', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional composer packages.');
         $this->addOption('platforms', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'List of platform architectures to build.', ['linux/arm64','linux/amd64']);
         $this->addOption('container-engine', 'e', InputOption::VALUE_OPTIONAL, 'Choose a container engine for building the image (supported: docker, podman)', 'docker');
     }
@@ -34,7 +35,6 @@ class CreateContainerCommand extends Command
     {
         $version = $input->getArgument('version');
         $imageName = $input->getArgument('image-name');
-        $composerPackages = $input->getOption('composer-packages');
         $engine = $input->getOption('container-engine');
         $allowedEngines = ['docker', 'podman'];
         if(!in_array($engine, $allowedEngines, true)) {
@@ -45,7 +45,13 @@ class CreateContainerCommand extends Command
         $composerService = new ComposerService();
         $requirements = $composerService->getRequirements($version, $input->getOption('php-modules'));
         $phpModules = $requirements['modules'];
+
+        // @todo: We may want to use the upper/lower bound defined in composer.json
         $phpVersion = $requirements['php'];
+        if($input->getOption('php')) {
+            $phpVersion = $input->getOption('php');
+        }
+
         $tags = $requirements['tags'];
 
         // Image tags, option: -t
@@ -89,7 +95,10 @@ class CreateContainerCommand extends Command
             $command[] = implode(',', $input->getOption('platforms'));
         }
 
-        $command[] = '--no-cache';
+        if($input->getOption('no-cache')) {
+            $command[] = '--no-cache';
+        }
+
         $command[] = '--progress=plain';
         $command[] = '.';
         $command[] = '-f';
@@ -100,14 +109,7 @@ class CreateContainerCommand extends Command
         $command[] = '--build-arg';
         $command[] = 'php_modules=' . implode(' ', $phpModules);
         $command[] = '--build-arg';
-        $command[] = 'typo3_version=' . $version;
-        $command[] = '--build-arg';
         $command[] = 'php_ext_configure=docker-php-ext-configure gd --with-freetype --with-jpeg';
-
-        if (!empty($composerPackages)) {
-            $command[] = '--build-arg';
-            $command[] = 'composer_packages_command=composer req ' . implode(' ', $composerPackages);
-        }
 
         if($input->getOption('push')) {
             $command[] = '--push';
