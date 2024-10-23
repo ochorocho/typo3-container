@@ -37,6 +37,10 @@ jobs:
         uses: docker/setup-buildx-action@v2
         with:
           platforms: linux/amd64,linux/arm64
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
       -
         name: "TYPO3 v13"
         shell: 'script -q -e -c "bash {0}"'

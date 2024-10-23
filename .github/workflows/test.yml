@@ -31,8 +31,12 @@ jobs:
         uses: docker/setup-buildx-action@v2
         with:
           platforms: linux/amd64,linux/arm64
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
       -
-        name: "TYPO3 latest (dev-main)"
+        name: "TYPO3 v13"
         shell: 'script -q -e -c "bash {0}"'
         run: ./bin/t3-container build ochorocho/typo3-container dev-main -x -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
       -
