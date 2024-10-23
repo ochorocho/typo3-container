@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build Container
+    name: Test Build Container
     runs-on: ubuntu-latest
     steps:
       -
@@ -19,7 +19,7 @@ jobs:
         name: Install composer
         uses: php-actions/composer@v6
         with:
-          php_version: "8.2"
+          php_version: "8.3"
       -
         name: Docker info
         run: docker info

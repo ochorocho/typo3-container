@@ -1,9 +1,9 @@
-# Include ARG before anything else, so the ARG is available for FROM. After from ARGs are reset!
+# Include ARG before anything else, so the ARG is available for FROM. After "FROM" ARGs are reset!
 ARG php_version
 FROM php:${php_version}-fpm
 
 # To ensure the variables are available for the rest of the
-# script due to the fact FROM does reset all ARGs
+# script due to the fact "FROM" does reset all ARGs
 ARG php_version
 ARG php_modules
 ARG php_ext_configure
@@ -36,21 +36,14 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
     mkdir /app && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# RUN echo "security.limit_extensions = .php .html" >> /usr/local/etc/php-fpm.d/www.conf
-
-#COPY ./config/www.conf /usr/local/etc/php-fpm.d/www.conf
-
 # Configure PHP
 COPY config/typo3.ini /usr/local/etc/php/conf.d/typo3.ini
 
 # Allow ImageMagick 6 to read/write pdf files
 COPY config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 
-# Seriously?!
-RUN mkdir /builds && chown -R www-data:www-data /usr/local/etc/php/conf.d/ && chmod -R 777 /usr/local/etc/php/conf.d
-
 # USER www-data
 
-WORKDIR /builds/
+WORKDIR /app/
 
 CMD ["/bin/sh", "-c", "echo \"$PHP_CONFIGURATION\" >> /usr/local/etc/php/conf.d/typo3.ini && php-fpm --allow-to-run-as-root"]
