@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Test Build Container
+    name: Build Container
     runs-on: ubuntu-latest
     steps:
       -
