@@ -1,0 +1,30 @@
+services:
+  webserver:
+    image: nginx:latest
+    container_name: webserver
+    env_file:
+      - .env
+    ports:
+      - "8888:80"
+    volumes:
+      - ./app:/app
+      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+  db:
+    image: mariadb:10.11
+    container_name: db
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: $TYPO3_DB_DBNAME
+      MYSQL_USER: $TYPO3_DB_USERNAME
+      MYSQL_PASSWORD: $TYPO3_DB_PASSWORD
+      MYSQL_TCP_PORT: $TYPO3_DB_PORT
+      MYSQL_ROOT_PASSWORD: $TYPO3_DB_PASSWORD
+
+  php:
+    image: ochorocho/typo3-container:v13
+    container_name: php
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
