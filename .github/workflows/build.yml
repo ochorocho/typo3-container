@@ -10,18 +10,22 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
           - TYPO3: dev-main
             PHP: 8.4
+            OS: ubuntu-24.04
           - TYPO3: v13
             PHP: 8.3
+            OS: ubuntu-24.04
           - TYPO3: v12
             PHP: 8.2
-#          - TYPO3: v11
-#            PHP: 8.1
+            OS: ubuntu-24.04
+          - TYPO3: v11
+            PHP: 8.1
+            OS: ubuntu-20.04
+    runs-on: ${{ matrix.OS }}
     steps:
       -
         name: Checkout code
