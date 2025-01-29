@@ -25,7 +25,9 @@ jobs:
 #          - TYPO3: v11
 #            PHP: 8.1
 #            OS: ubuntu-20.04
-    runs-on: ${{ matrix.OS }}
+#    runs-on:
+#      labels: ubuntu-20.04-16core
+    runs-on: ubuntu-20.04
     steps:
       -
         name: Checkout code
