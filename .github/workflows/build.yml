@@ -22,9 +22,9 @@ jobs:
           - TYPO3: v12
             PHP: 8.2
             OS: ubuntu-24.04
-          - TYPO3: v11
-            PHP: 8.1
-            OS: ubuntu-20.04
+#          - TYPO3: v11
+#            PHP: 8.1
+#            OS: ubuntu-20.04
     runs-on: ${{ matrix.OS }}
     steps:
       -
@@ -46,10 +46,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64,linux/arm64
       - name: Setup PHP
