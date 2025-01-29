@@ -18,7 +18,8 @@ USER root
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
         imagemagick ghostscript locales-all libzip4 libpq-dev \
-        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev && \
+        libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev \
+        gcc g++ make binutils cpp libc-dev libstdc++-12-dev libncurses-dev icu-devtools linux-libc-dev apt-utils && \
     $php_ext_configure && \
     # Unattended install of the redis module
     echo '' | pecl install redis && \
