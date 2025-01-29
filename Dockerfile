@@ -1,5 +1,5 @@
 # Include ARG before anything else, so the ARG is available for FROM. After "FROM" ARGs are reset!
-ARG php_version
+ARG php_version=8.1
 FROM php:${php_version}-fpm
 
 # To ensure the variables are available for the rest of the

@@ -9,8 +9,19 @@ on:
 
 jobs:
   build:
-    name: Build Container
+    name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - TYPO3: dev-main
+            PHP: 8.4
+          - TYPO3: v13
+            PHP: 8.3
+          - TYPO3: v12
+            PHP: 8.2
+          - TYPO3: v11
+            PHP: 8.1
     steps:
       -
         name: Checkout code
@@ -42,15 +53,6 @@ jobs:
         with:
           php-version: '8.3'
       -
-        name: "TYPO3 v13"
+        name: "TYPO3 ${{ matrix.TYPO3 }} - PHP ${{ matrix.PHP }}"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container v13 --php 8.3 -x -p
-      -
-        name: "TYPO3 v12"
-        shell: 'script -q -e -c "bash {0}"'
-        # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in < v12
-        run: ./bin/t3-container build ochorocho/typo3-container v12 -x -p
-      -
-        name: "TYPO3 v11"
-        shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container v11 -x -p
+        run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.TYPO3 }} --php ${{ matrix.PHP }} -x -p
