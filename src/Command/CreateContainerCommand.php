@@ -29,6 +29,7 @@ class CreateContainerCommand extends Command
         $this->addOption('php-modules', 'm', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional PHP modules.');
         $this->addOption('platforms', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'List of platform architectures to build.', ['linux/arm64','linux/amd64']);
         $this->addOption('container-engine', 'e', InputOption::VALUE_OPTIONAL, 'Choose a container engine for building the image (supported: docker, podman)', 'docker');
+        $this->addOption('registry', '-r', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Registry to push the image to', ['docker.io']);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -56,9 +57,12 @@ class CreateContainerCommand extends Command
 
         // Image tags, option: -t
         $tagOption = [];
-        foreach ($tags as $tag) {
-            $tagOption[] = '-t';
-            $tagOption[] = $imageName . ':' . $tag;
+
+        foreach ($input->getOption('registry') as $registry) {
+            foreach ($tags as $tag) {
+                $tagOption[] = '-t';
+                $tagOption[] = $registry . '/' . $imageName . ':' . $tag;
+            }
         }
 
         $platformMessage = '';
@@ -75,7 +79,7 @@ class CreateContainerCommand extends Command
 
         // Output general details
         $output->writeln('<info>PHP version to be included:</info>');
-        $output->writeln(' * ' . $requirements['php']);
+        $output->writeln(' * ' . $phpVersion);
         $output->writeln('<info>PHP modules to be included (excluding those already enabled):</info>');
         $output->writeln(' * ' . implode(PHP_EOL . ' * ', $requirements['modules']));
         $output->writeln('⛵️ Using container engine "' . $engine . '" (' . $binary . ')');

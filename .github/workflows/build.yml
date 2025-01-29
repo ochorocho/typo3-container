@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
@@ -20,8 +20,8 @@ jobs:
             PHP: 8.3
           - TYPO3: v12
             PHP: 8.2
-          - TYPO3: v11
-            PHP: 8.1
+#          - TYPO3: v11
+#            PHP: 8.1
     steps:
       -
         name: Checkout code
@@ -55,4 +55,6 @@ jobs:
       -
         name: "TYPO3 ${{ matrix.TYPO3 }} - PHP ${{ matrix.PHP }}"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.TYPO3 }} --php ${{ matrix.PHP }} -x -p
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          ./bin/t3-container build ochorocho/typo3-container ${{ matrix.TYPO3 }} --php ${{ matrix.PHP }} -x -p
