@@ -27,7 +27,7 @@ jobs:
 #            OS: ubuntu-20.04
 #    runs-on:
 #      labels: ubuntu-20.04-16core
-    runs-on: ubuntu-20.04
+    runs-on:  self-hosted
     steps:
       -
         name: Checkout code

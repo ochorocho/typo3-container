@@ -16,7 +16,7 @@ ENV TZ="UTC"
 USER root
 
 RUN apt-get update && \
-    apt-get install --install-recommends -y \
+    apt-get install -y \
         imagemagick ghostscript locales-all libzip4 libpq-dev libgd-dev libjpeg-dev libxpm-dev \
         libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev \
         build-essential && \
