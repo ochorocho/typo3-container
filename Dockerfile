@@ -1,6 +1,6 @@
 # Include ARG before anything else, so the ARG is available for FROM. After "FROM" ARGs are reset!
 ARG php_version=8.1
-FROM php:${php_version}-fpm
+FROM php:${php_version}-fpm-bullseye
 
 # To ensure the variables are available for the rest of the
 # script due to the fact "FROM" does reset all ARGs
