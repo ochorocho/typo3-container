@@ -13,15 +13,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - TYPO3: dev-main
-            PHP: 8.3
-            OS: ubuntu-24.04
+#          - TYPO3: dev-main
+#            PHP: 8.3
+#            OS: ubuntu-22.04
           - TYPO3: v13
             PHP: 8.3
-            OS: ubuntu-24.04
+            OS: ubuntu-22.04
           - TYPO3: v12
             PHP: 8.2
-            OS: ubuntu-24.04
+            OS: ubuntu-22.04
 #          - TYPO3: v11
 #            PHP: 8.1
 #            OS: ubuntu-20.04
