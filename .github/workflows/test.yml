@@ -9,8 +9,25 @@ on:
 
 jobs:
   build:
-    name: Test Build Container
-    runs-on: ubuntu-latest
+    name: Test Build
+    strategy:
+      matrix:
+        include:
+#          - TYPO3: dev-main
+#            PHP: 8.3
+#            OS: ubuntu-22.04
+          - TYPO3: v13
+            PHP: 8.3
+            OS: ubuntu-22.04
+          - TYPO3: v12
+            PHP: 8.2
+            OS: ubuntu-22.04
+#          - TYPO3: v11
+#            PHP: 8.1
+#            OS: ubuntu-20.04
+#    runs-on:
+#      labels: ubuntu-20.04-16core
+    runs-on:  self-hosted
     steps:
       -
         name: Checkout code
@@ -25,10 +42,10 @@ jobs:
         run: docker info
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64,linux/arm64
       - name: Setup PHP
@@ -36,15 +53,6 @@ jobs:
         with:
           php-version: '8.3'
       -
-        name: "TYPO3 v13"
+        name: "TYPO3 ${{ matrix.TYPO3 }} - PHP ${{ matrix.PHP }}"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container dev-main -x -c "typo3/cms-webhooks:dev-main typo3/cms-reactions:dev-main"
-      -
-        name: "TYPO3 v12"
-        shell: 'script -q -e -c "bash {0}"'
-        # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in older versions
-        run: ./bin/t3-container build ochorocho/typo3-container v12 -x -c "typo3/cms-webhooks:^12 typo3/cms-reactions:^12"
-      -
-        name: "TYPO3 v11"
-        shell: 'script -q -e -c "bash {0}"'
-        run:  ./bin/t3-container build ochorocho/typo3-container v11 -x
+        run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.TYPO3 }} --php ${{ matrix.PHP }} -x

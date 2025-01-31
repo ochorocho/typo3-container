@@ -9,8 +9,24 @@ on:
 
 jobs:
   build:
-    name: Build Container
-    runs-on: ubuntu-latest
+    name: Build
+    strategy:
+      matrix:
+        include:
+          - TYPO3: dev-main
+            PHP: 8.3
+            OS: ubuntu-24.04
+          - TYPO3: v13
+            PHP: 8.3
+            OS: ubuntu-24.04
+          - TYPO3: v12
+            PHP: 8.2
+            OS: ubuntu-24.04
+#          - TYPO3: v11
+#            PHP: 8.1
+#            OS: ubuntu-20.04
+    runs-on:
+      labels: ubuntu-24.04-16core
     steps:
       -
         name: Checkout code
@@ -19,7 +35,7 @@ jobs:
         name: Install composer
         uses: php-actions/composer@v6
         with:
-          php_version: "8.3"
+          php_version: "8.4"
       -
         name: Docker info
         run: docker info
@@ -31,10 +47,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64,linux/arm64
       - name: Setup PHP
@@ -42,15 +58,8 @@ jobs:
         with:
           php-version: '8.3'
       -
-        name: "TYPO3 v13"
+        name: "TYPO3 ${{ matrix.TYPO3 }} - PHP ${{ matrix.PHP }}"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container v13 --php 8.3 -x -p
-      -
-        name: "TYPO3 v12"
-        shell: 'script -q -e -c "bash {0}"'
-        # Additionally, require typo3/cms-webhooks and typo3/cms-reactions because these are not available in < v12
-        run: ./bin/t3-container build ochorocho/typo3-container v12 -x -p
-      -
-        name: "TYPO3 v11"
-        shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container v11 -x -p
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          ./bin/t3-container build ochorocho/typo3-container ${{ matrix.TYPO3 }} --php ${{ matrix.PHP }} -x -p
