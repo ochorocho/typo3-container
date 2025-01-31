@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - TYPO3: dev-main
-            PHP: 8.4
+            PHP: 8.3
             OS: ubuntu-24.04
           - TYPO3: v13
             PHP: 8.3
