@@ -113,7 +113,7 @@ class CreateContainerCommand extends Command
         $command[] = '--build-arg';
         $command[] = 'php_modules=' . implode(' ', $phpModules);
         $command[] = '--build-arg';
-        $command[] = 'php_ext_configure=docker-php-ext-configure gd --with-freetype --with-jpeg';
+        $command[] = 'php_ext_configure=docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp';
 
         if($input->getOption('push')) {
             $command[] = '--push';
