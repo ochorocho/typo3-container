@@ -44,17 +44,20 @@ provide more and more stuff as we go.
 ## Build a image
 
 Build `dev-main`:
-```
+
+```bash
 ./bin/t3-container build ochorocho/typo3-container dev-main
 ```
 
 Build `v12.1` (will be the image tag) which will pick the latest release of `v12.1.x` :
-```
+
+```bash
 ./bin/t3-container build ochorocho/typo3-container 12.1
 ```
 
 Build a specific version `v12.1.1` (will be the image tag):
-```
+
+```bash
 ./bin/t3-container build ochorocho/typo3-container 12.1.1
 ```
 
@@ -79,7 +82,6 @@ Image version example:
 | `v11.5.24`             | v11.5.24 (specific version) | 8.0         |
 | ...                    | ...                         | ...         |
 
-
 ## Minimal command
 
 ```bash
@@ -92,7 +94,6 @@ Image version example:
 |------------------|---------------------------------------------------------------------------------------------------------------------|
 | <container-name> | The container name, e.g. `ochorocho/typo3-container`                                                                |
 | <version>        | TYPO3 version to use. If set to 'v12.2' the latest version of 'v12.2.x' will be picked and both versions are tagged |
-
 
 ## Command options
 
@@ -116,22 +117,22 @@ All options example:
 
 The container comes with TYPO3 preinstalled in `/var/www/html`. So you can issue a single command to run TYPO3:
 
-```
+```bash
 docker run -d --name <container-name> -p 3333:80 ochorocho/typo3-container:v12
 ```
 
 Login as root:
 
-```
+```bash
 docker exec -it -u 0 <container-name> bash
 ```
 
 ## Todo
 
-  * Add composer version switch
-  * Allow to force PHP version
-  * Allow to add additional packages
-  * Allow to add additional docker-ext-configure arguments
-  * Create example docker-compose.yml (mysql, mariadb, postgresql)
-  * Kubernetes/Helm chart
-  * Test the images. Idea: start the container image and go through the setup and see the backend.
+- Add composer version switch
+- Allow to force PHP version
+- Allow to add additional packages
+- Allow to add additional docker-ext-configure arguments
+- Create example docker-compose.yml (mysql, mariadb, postgresql)
+- Kubernetes/Helm chart
+- Test the images. Idea: start the container image and go through the setup and see the backend.
