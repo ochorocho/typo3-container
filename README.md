@@ -33,13 +33,13 @@ docker run --rm --interactive --tty --user $(id -u):$(id -g) --volume $PWD:/app 
 Use the `./bin/t3-container` script to build a Docker container for TYPO3 v11 and later.
 This little wrapper is used to feed the `Dockerfile` with all required
 variables (TYPO3 version, PHP modules, PHP version). PHP modules and PHP version will
-be composed of requirements found in [composer.json](https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json). 
+be composed of requirements found in [composer.json](https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json).
 
-:warning: At the moment this is just an experiment! But the idea is to have a production ready TYPO3 container image.
-
-    For now this will not cover an "everyone and their dog"-setup.
-    It is more of a base image to start with TYPO3 and Docker and try to
-    provide more and more stuff as we go.
+> [!WARNING]
+> At the moment this is just an experiment! But the idea is to have a production ready TYPO3 container image.
+For now this will not cover an "everyone and their dog"-setup.
+It is more of a base image to start with TYPO3 and Docker and try to
+provide more and more stuff as we go.
 
 ## Build a image
 
