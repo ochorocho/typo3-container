@@ -118,7 +118,7 @@ All options example:
 The container comes with TYPO3 preinstalled in `/var/www/html`. So you can issue a single command to run TYPO3:
 
 ```bash
-docker run -d --name <container-name> -p 3333:80 ochorocho/typo3-container:v12
+docker run -d --name <container-name> -p 9999:9000 ochorocho/typo3-container:v12
 ```
 
 Login as root:

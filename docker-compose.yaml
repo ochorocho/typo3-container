@@ -1,0 +1,40 @@
+
+services:
+  typo3:
+    image: brutalbirdie/typo3:13.4.1
+    container_name: typo3
+    volumes:
+      - typo3-data:/var/www/html/
+    networks:
+      - typo3
+      - mariadb
+  mariadb:
+    image: mariadb:10-jammy
+    container_name: maridadb
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: typo3
+      MARIADB_USER: typo3
+      MARIADB_PASSWORD: typo3
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - mariadb
+  nginx:
+    image: nginx:1.27.4
+    container_name: nginx
+    ports:
+      - 80:80
+    volumes:
+      - typo3-data:/var/www/html/
+      - ./config/typo3_nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - typo3
+
+volumes:
+  typo3-data:
+  db-data:
+
+networks:
+  mariadb:
+  typo3:

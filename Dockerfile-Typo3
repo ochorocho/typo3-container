@@ -1,0 +1,17 @@
+FROM ochorocho/typo3-container:v13.4.7
+
+WORKDIR /var/www/html
+
+ARG TYPO3_VERSION=13.4.1
+
+# Install TYPO3 from source - Not possible because?¿
+# RUN cd /tmp/ && \
+#     curl -L https://github.com/TYPO3/typo3/archive/refs/tags/v${TYPO3_VERSION}.tar.gz | tar zx && \
+#     mv typo3-${TYPO3_VERSION}/* /var/www/html/ && \
+#     rm -rf typo3-${TYPO3_VERSION} && \
+#     cd /var/www/html
+
+# Use the "correct" method according to the Typo3 guys at Cloudfest
+RUN composer create-project typo3/cms-base-distribution:v${TYPO3_VERSION} /var/www/html
+
+RUN chown -R www-data:www-data /var/www/html
