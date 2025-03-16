@@ -1,4 +1,34 @@
-### TYPO3 Docker Builder
+# TYPO3 Docker Builder
+
+## Table of content
+
+- [TYPO3 Docker Builder](#typo3-docker-builder)
+  - [Table of content](#table-of-content)
+  - [Getting Started](#getting-started)
+  - [Usage](#usage)
+  - [Build a image](#build-a-image)
+  - [Image tags](#image-tags)
+  - [Minimal command](#minimal-command)
+  - [Command arguments](#command-arguments)
+  - [Command options](#command-options)
+  - [Run the container](#run-the-container)
+  - [Todo](#todo)
+
+## Getting Started
+
+If you have a local composer install, use that
+
+```bash
+composer install
+```
+
+Since we use docker anyway
+
+```bash
+docker run --rm --interactive --tty --user $(id -u):$(id -g) --volume $PWD:/app composer:lts composer install
+```
+
+## Usage
 
 Use the `./bin/t3-container` script to build a Docker container for TYPO3 v11 and later.
 This little wrapper is used to feed the `Dockerfile` with all required
