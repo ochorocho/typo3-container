@@ -14,7 +14,7 @@ if [[ ! -f /var/www/html/public/.inited ]]; then
     TYPO3_SETUP_ADMIN_EMAIL=admin@local.host \
     TYPO3_SETUP_ADMIN_USERNAME=admin \
     TYPO3_SETUP_ADMIN_PASSWORD=ChangeMe123! \
-    TYPO3_SETUP_CREATE_SITE="localhost" \
+    TYPO3_SETUP_CREATE_SITE="http://localhost" \
     TYPO3_PROJECT_NAME="Automated Setup" \
     TYPO3_SERVER_TYPE="other" \
     ./vendor/bin/typo3 setup --force
@@ -33,7 +33,7 @@ if [[ ! -f $TYPO3_ADDITIONAL_PHP_CONFIG_FILE ]]; then
     'SYS' => [
         'trustedHostsPattern' => '.*',
     ]
-]" > $TYPO3_ADDITIONAL_PHP_CONFIG_FILE
+]);" > $TYPO3_ADDITIONAL_PHP_CONFIG_FILE
 
 fi
 chown -R www-data:www-data /var/www/html
