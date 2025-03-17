@@ -15,3 +15,7 @@ ARG TYPO3_VERSION=13.4.1
 RUN composer create-project typo3/cms-base-distribution:v${TYPO3_VERSION} /var/www/html
 
 RUN chown -R www-data:www-data /var/www/html
+
+COPY docker/ /
+
+CMD ["/app/code/docker-entryoint.sh"]

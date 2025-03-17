@@ -8,6 +8,15 @@ services:
     networks:
       - typo3
       - mariadb
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "echo", "READY"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
   mariadb:
     image: mariadb:10-jammy
     container_name: maridadb
@@ -20,6 +29,12 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - mariadb
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
   nginx:
     image: nginx:1.27.4
     container_name: nginx
@@ -30,6 +45,9 @@ services:
       - ./config/typo3_nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - typo3
+    depends_on:
+      typo3:
+        condition: service_healthy
 
 volumes:
   typo3-data:
