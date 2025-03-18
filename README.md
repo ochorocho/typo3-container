@@ -28,7 +28,7 @@ Also included is a [`docker-compose.yaml`](./docker-compose.yaml) with [mariadb]
 
 ### dcx.sh - docker-compose helper script
 
-in the [dcx.sh](./bin/dcx.sh) bash script provides some comfort features like:
+The [dcx.sh](./bin/dcx.sh) bash script provides some comfort features like:
 
 ```bash
 ./bin/dcx.sh
