@@ -7,6 +7,10 @@ Also included is a [`docker-compose.yaml`](./docker-compose.yaml) with [mariadb]
 
 - [TYPO3 Docker Builder](#typo3-docker-builder)
   - [Table of content](#table-of-content)
+  - [Running Typo3 with NGINX and MariaDB with docker-compose](#running-typo3-with-nginx-and-mariadb-with-docker-compose)
+    - [dcx.sh - docker-compose helper script](#dcxsh---docker-compose-helper-script)
+    - [Web Access](#web-access)
+      - [Web Admin Access](#web-admin-access)
   - [Local Development - Getting Started](#local-development---getting-started)
     - [Installing the dependencies](#installing-the-dependencies)
       - [Native php composer](#native-php-composer)
@@ -18,9 +22,33 @@ Also included is a [`docker-compose.yaml`](./docker-compose.yaml) with [mariadb]
     - [Command arguments](#command-arguments)
     - [Command options](#command-options)
     - [Run the container](#run-the-container)
-  - [docker-compose and helpers](#docker-compose-and-helpers)
-    - [dcx.sh - docker-compose helper script](#dcxsh---docker-compose-helper-script)
   - [Todo](#todo)
+
+## Running Typo3 with NGINX and MariaDB with docker-compose
+
+### dcx.sh - docker-compose helper script
+
+in the [dcx.sh](./bin/dcx.sh) bash script provides some comfort features like:
+
+```bash
+./bin/dcx.sh
+Usage: dcx [command]
+Commands:
+  start - Start the docker-compose setup
+  stop - Stop the docker-compose
+  logs - Show logs
+  restart - restart the docker-compose setup
+  reset - Reset the docker-compose !!! DESTRUCTIVE !!!
+```
+
+### Web Access
+
+By default you can visit <http://localhost/> and only `localhost` because of the Typo3 Site configuration.
+
+#### Web Admin Access
+
+By default you can visit <http://localhost/typo3> for the admin access.
+The default User is `admin` and the password is `ChangeMe123!` defined in the [docker-entryoint.sh](./docker/app/code/docker-entryoint.sh#L17-L18)
 
 ## Local Development - Getting Started
 
@@ -139,23 +167,6 @@ Login as root:
 
 ```bash
 docker exec -it -u 0 <container-name> bash
-```
-
-## docker-compose and helpers
-
-### dcx.sh - docker-compose helper script
-
-in the [dcx.sh](./bin/dcx.sh) bash script provides some comfort features like:
-
-```bash
-./bin/dcx.sh
-Usage: dcx [command]
-Commands:
-  start - Start the docker-compose setup
-  stop - Stop the docker-compose
-  logs - Show logs
-  restart - restart the docker-compose setup
-  reset - Reset the docker-compose !!! DESTRUCTIVE !!!
 ```
 
 ## Todo
