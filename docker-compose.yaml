@@ -42,7 +42,7 @@ services:
       - 80:80
     volumes:
       - typo3-data:/var/www/html/
-      - ./config/typo3_nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/etc/nginx/conf.d/typo3_nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - typo3
     depends_on:
