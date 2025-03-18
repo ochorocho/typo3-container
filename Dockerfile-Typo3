@@ -1,6 +1,6 @@
 FROM ochorocho/typo3-container:v13.4.7
 
-WORKDIR /var/www/html
+WORKDIR /app/code
 
 ARG TYPO3_VERSION=13.4.1
 
@@ -12,9 +12,9 @@ ARG TYPO3_VERSION=13.4.1
 #     cd /var/www/html
 
 # Use the "correct" method according to the Typo3 guys at Cloudfest
-RUN composer create-project typo3/cms-base-distribution:v${TYPO3_VERSION} /var/www/html
+RUN composer create-project typo3/cms-base-distribution:v${TYPO3_VERSION} /app/code/
 
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /app/code
 
 COPY docker/ /
 

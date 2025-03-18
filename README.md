@@ -1,5 +1,8 @@
 # TYPO3 Docker Builder
 
+This repository has the [`Dockerfile`](./Dockerfile) for the typo3 base and the [`Dockerfile`](./Dockerfile-Typo3) for typo3 it self.
+Also included is a [`docker-compose.yaml`](./docker-compose.yaml) with [mariadb](https://hub.docker.com/_/mariadb) and [nginx](https://hub.docker.com/_/nginx).
+
 ## Table of content
 
 - [TYPO3 Docker Builder](#typo3-docker-builder)
@@ -12,6 +15,8 @@
   - [Command arguments](#command-arguments)
   - [Command options](#command-options)
   - [Run the container](#run-the-container)
+  - [Docker Compose and helpers](#docker-compose-and-helpers)
+    - [dcx.sh - docker-compose helper script](#dcxsh---docker-compose-helper-script)
   - [Todo](#todo)
 
 ## Getting Started
@@ -127,12 +132,28 @@ Login as root:
 docker exec -it -u 0 <container-name> bash
 ```
 
+## Docker Compose and helpers
+
+### dcx.sh - docker-compose helper script
+
+in the [dcx.sh](./bin/dcx.sh) bash script provides some comfort features like:
+
+```bash
+./bin/dcx.sh
+Usage: dcx [command]
+Commands:
+  start - Start the docker-compose setup
+  stop - Stop the docker-compose
+  logs - Show logs
+  restart - restart the docker-compose setup
+  reset - Reset the docker-compose !!! DESTRUTIVE !!!
+```
+
 ## Todo
 
 - Add composer version switch
 - Allow to force PHP version
 - Allow to add additional packages
 - Allow to add additional docker-ext-configure arguments
-- Create example docker-compose.yml (mysql, mariadb, postgresql)
 - Kubernetes/Helm chart
 - Test the images. Idea: start the container image and go through the setup and see the backend.

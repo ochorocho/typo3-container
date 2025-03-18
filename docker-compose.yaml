@@ -4,7 +4,7 @@ services:
     image: brutalbirdie/typo3:13.4.1
     container_name: typo3
     volumes:
-      - typo3-data:/var/www/html/
+      - typo3-data:/app/code/
     networks:
       - typo3
       - mariadb
@@ -41,7 +41,7 @@ services:
     ports:
       - 80:80
     volumes:
-      - typo3-data:/var/www/html/
+      - typo3-data:/app/code/
       - ./docker/etc/nginx/conf.d/typo3_nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - typo3

@@ -1,9 +1,11 @@
 #!/bin/bash
 
+WORKDIR="/app/code"
+
 # Check if .inited  does not exist
-if [[ ! -f /var/www/html/public/.inited ]]; then
+if [[ ! -f $WORKDIR/public/.inited ]]; then
     echo "=> Setting up Typo3 with defaults for the first time"
-    touch /var/www/html/public/.inited
+    touch $WORKDIR/public/.inited
 
     TYPO3_DB_DRIVER=mysqli \
     TYPO3_DB_USERNAME=typo3 \
@@ -22,7 +24,7 @@ if [[ ! -f /var/www/html/public/.inited ]]; then
     # [TODO] TYPO3_SETUP_CREATE_SITE should be dynamic from the starter
 fi
 
-TYPO3_ADDITIONAL_PHP_CONFIG_FILE="/var/www/html/config/system/additional.php"
+TYPO3_ADDITIONAL_PHP_CONFIG_FILE="$WORKDIR/config/system/additional.php"
 
 if [[ ! -f $TYPO3_ADDITIONAL_PHP_CONFIG_FILE ]]; then
     touch $TYPO3_ADDITIONAL_PHP_CONFIG_FILE
@@ -36,7 +38,7 @@ if [[ ! -f $TYPO3_ADDITIONAL_PHP_CONFIG_FILE ]]; then
 ]);" > $TYPO3_ADDITIONAL_PHP_CONFIG_FILE
 
 fi
-chown -R www-data:www-data /var/www/html
+chown -R www-data:www-data $WORKDIR
 
 # Run php-fpm?
 echo "$PHP_CONFIGURATION" >> /usr/local/etc/php/conf.d/typo3.ini
