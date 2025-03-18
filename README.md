@@ -146,7 +146,7 @@ Commands:
   stop - Stop the docker-compose
   logs - Show logs
   restart - restart the docker-compose setup
-  reset - Reset the docker-compose !!! DESTRUTIVE !!!
+  reset - Reset the docker-compose !!! DESTRUCTIVE !!!
 ```
 
 ## Todo

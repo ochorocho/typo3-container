@@ -9,7 +9,7 @@ if [[ $1 == "-h" || $1 == "--help" || $1 == "" ]]; then
     echo "  stop - Stop the docker-compose"
     echo "  logs - Show logs"
     echo "  restart - restart the docker-compose setup"
-    echo "  reset - Reset the docker-compose !!! DESTRUTIVE !!!"
+    echo "  reset - Reset the docker-compose !!! DESTRUCTIVE !!!"
     # echo "  build - Build the container"
 fi
 
