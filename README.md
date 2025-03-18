@@ -7,19 +7,26 @@ Also included is a [`docker-compose.yaml`](./docker-compose.yaml) with [mariadb]
 
 - [TYPO3 Docker Builder](#typo3-docker-builder)
   - [Table of content](#table-of-content)
-  - [Getting Started](#getting-started)
-  - [Usage](#usage)
-  - [Build a image](#build-a-image)
-  - [Image tags](#image-tags)
-  - [Minimal command](#minimal-command)
-  - [Command arguments](#command-arguments)
-  - [Command options](#command-options)
-  - [Run the container](#run-the-container)
-  - [Docker Compose and helpers](#docker-compose-and-helpers)
+  - [Local Development - Getting Started](#local-development---getting-started)
+    - [Installing the dependencies](#installing-the-dependencies)
+      - [Native php composer](#native-php-composer)
+      - [Using docker for php composer](#using-docker-for-php-composer)
+    - [Usage](#usage)
+    - [Build a image](#build-a-image)
+    - [Image tags](#image-tags)
+    - [Minimal command](#minimal-command)
+    - [Command arguments](#command-arguments)
+    - [Command options](#command-options)
+    - [Run the container](#run-the-container)
+  - [docker-compose and helpers](#docker-compose-and-helpers)
     - [dcx.sh - docker-compose helper script](#dcxsh---docker-compose-helper-script)
   - [Todo](#todo)
 
-## Getting Started
+## Local Development - Getting Started
+
+### Installing the dependencies
+
+#### Native php composer
 
 If you have a local composer install, use that
 
@@ -27,13 +34,15 @@ If you have a local composer install, use that
 composer install
 ```
 
+#### Using docker for php composer
+
 Since we use docker anyway
 
 ```bash
 docker run --rm --interactive --tty --user $(id -u):$(id -g) --volume $PWD:/app composer:lts composer install
 ```
 
-## Usage
+### Usage
 
 Use the `./bin/t3-container` script to build a Docker container for TYPO3 v11 and later.
 This little wrapper is used to feed the `Dockerfile` with all required
@@ -46,7 +55,7 @@ For now this will not cover an "everyone and their dog"-setup.
 It is more of a base image to start with TYPO3 and Docker and try to
 provide more and more stuff as we go.
 
-## Build a image
+### Build a image
 
 Build `dev-main`:
 
@@ -66,7 +75,7 @@ Build a specific version `v12.1.1` (will be the image tag):
 ./bin/t3-container build ochorocho/typo3-container 12.1.1
 ```
 
-## Image tags
+### Image tags
 
 The image will be built once a day by a GitHub Action. This might change to once a week.
 Depending on how often things change.
@@ -77,7 +86,7 @@ If the given version is `v12` tags for `v12` `v12.x` and `v12.x.x` where `x` is 
 Image version example:
 
 | Tag                    | TYPO3 version               | PHP version |
-|------------------------|-----------------------------|-------------|
+| ---------------------- | --------------------------- | ----------- |
 | `latest` or `dev-main` | dev-main                    | 8.1         |
 | `v12`                  | v12.x.x (latest v12)        | 8.1         |
 | `v12.2`                | v12.2.x (latest v12.2)      | 8.1         |
@@ -87,23 +96,23 @@ Image version example:
 | `v11.5.24`             | v11.5.24 (specific version) | 8.0         |
 | ...                    | ...                         | ...         |
 
-## Minimal command
+### Minimal command
 
 ```bash
 ./bin/t3-container build <container-name> <version>
-````
+```
 
-## Command arguments
+### Command arguments
 
 | Argument         | Description                                                                                                         |
-|------------------|---------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
 | <container-name> | The container name, e.g. `ochorocho/typo3-container`                                                                |
 | <version>        | TYPO3 version to use. If set to 'v12.2' the latest version of 'v12.2.x' will be picked and both versions are tagged |
 
-## Command options
+### Command options
 
 | Option | Description                                                                                                                                                                                                                                   |
-|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | --php  | Specify PHP version (If not set the lower bound defined in composer.json will be used)                                                                                                                                                        |
 | -x     | Build multi-arch image                                                                                                                                                                                                                        |
 | -p     | Push image to docker hub after successful build                                                                                                                                                                                               |
@@ -118,7 +127,7 @@ All options example:
 ./bin/t3-container build ochorocho/typo3-container dev-main -m "intl opcache" -e podman -a linux/arm64 -x -p
 ```
 
-## Run the container
+### Run the container
 
 The container comes with TYPO3 preinstalled in `/var/www/html`. So you can issue a single command to run TYPO3:
 
@@ -132,7 +141,7 @@ Login as root:
 docker exec -it -u 0 <container-name> bash
 ```
 
-## Docker Compose and helpers
+## docker-compose and helpers
 
 ### dcx.sh - docker-compose helper script
 
