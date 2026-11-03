@@ -21,6 +21,7 @@ class CreateContainerCommand extends Command
     {
         $this->addArgument('image-name', InputArgument::REQUIRED, 'Name of the container to be created.');
         $this->addArgument('version', InputArgument::REQUIRED, 'TYPO3 version to build.');
+        $this->addOption('additional-image', null, InputOption::VALUE_REQUIRED|InputOption::VALUE_IS_ARRAY, 'Also tag and push the image under this name, e.g. ghcr.io/ochorocho/typo3-container.');
         $this->addOption('buildx', 'x', InputOption::VALUE_NONE, 'Build multiarch image.');
         $this->addOption('push', 'p', InputOption::VALUE_NONE, 'Push image to repository after the build has finished.');
         $this->addOption('load', 'l', InputOption::VALUE_NONE, 'Load image into docker.');
@@ -59,9 +60,12 @@ class CreateContainerCommand extends Command
 
         // Image tags, option: -t
         $tagOption = [];
-        foreach ($tags as $tag) {
-            $tagOption[] = '-t';
-            $tagOption[] = $imageName . ':' . $tag;
+        $imageNames = array_merge([$imageName], $input->getOption('additional-image'));
+        foreach ($imageNames as $name) {
+            foreach ($tags as $tag) {
+                $tagOption[] = '-t';
+                $tagOption[] = $name . ':' . $tag;
+            }
         }
 
         $platformMessage = '';
@@ -131,7 +135,7 @@ class CreateContainerCommand extends Command
         $process->run();
 
         if($process->isSuccessful() && $input->getOption('push')) {
-            $output->writeln('🐳 Pushed container ' . $imageName . ':' . $version . ' with tags ' . implode(', ', $tags) . ' to docker hub.');
+            $output->writeln('🐳 Pushed ' . implode(', ', $imageNames) . ' with tags ' . implode(', ', $tags) . '.');
         } elseif ($process->isSuccessful()) {
             $output->writeln('🎁 Build of container ' . $imageName . ':' . $version . ' with tags ' . implode(', ', $tags) . ' successful');
         }

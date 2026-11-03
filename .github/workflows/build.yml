@@ -11,6 +11,9 @@ jobs:
   build:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       # A failing image must not cancel the others
       fail-fast: false
@@ -46,6 +49,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       -
@@ -60,4 +70,4 @@ jobs:
       -
         name: Build and push image
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.version }} ${{ matrix.options }} -x -p
+        run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.version }} ${{ matrix.options }} --additional-image ghcr.io/ochorocho/typo3-container -x -p
