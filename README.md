@@ -72,7 +72,8 @@ Image version example:
 | --php-tag | Add the PHP version to all image tags, e.g. `v14-php8.5`. Needed when building one TYPO3 version for several PHP versions |
 | --keep-plain-tags | With `--php-tag`, also add the tags without PHP version, e.g. `v14` |
 | -x     | Build multi-arch image                                                                                                                                                                                                                        |
-| -p     | Push image to docker hub after successful build                                                                                                                                                                                               |
+| -p     | Push image to its registry after successful build                                                                                                                                                                                             |
+| --additional-image | Also tag and push the image under this name, e.g. `ghcr.io/ochorocho/typo3-container`. Can be used more than once |
 | -l     | Load image into docker                                                                                                                                                                                                                        |
 | -m     | Add additional PHP modules to the build, e.g. '-m "imagick xdebug"'. Usually, the dependencies are read from `composer.json`. Modules are installed as `php<php_version>-<module>` packages from https://deb.sury.org/                         |
 | -e     | Container engine to use for building the image. Possible values are "docker" or "podman"                                                                                                                                                      |

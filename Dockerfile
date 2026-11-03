@@ -58,6 +58,9 @@ RUN cp /tmp/imagemagick-policy.xml /etc/ImageMagick-*/policy.xml && rm /tmp/imag
 
 WORKDIR /app/
 
+# Links the package on ghcr.io to this repository
+LABEL org.opencontainers.image.source="https://github.com/ochorocho/typo3-container"
+
 EXPOSE 9000
 
 # Graceful php-fpm shutdown
