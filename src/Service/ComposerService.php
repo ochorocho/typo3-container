@@ -25,24 +25,20 @@ class ComposerService
     /**
      * @throws TransportExceptionInterface
      */
-    public function getRequirements(string $version = 'dev-main', array $additionalPhpModules = []): array
+    public function getRequirements(string $version = 'dev-main', array $additionalPhpModules = [], ?string $phpVersion = null): array
     {
         if ($version === 'dev-main') {
             $composerJson = $this->request('https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json');
             $versionName = $version;
         } else {
             // @todo: use composer to find package?!
-            $tags = $this->request('https://api.github.com/repos/typo3/typo3/tags?per_page=999');
-            $filteredVersions = array_filter($tags, function ($value) use ($version) {
-                return str_contains($value['name'], $version);
-            });
-            $sha = reset($filteredVersions)['commit']['sha'];
-            $composerJson = $this->request('https://raw.githubusercontent.com/TYPO3/typo3/' . $sha . '/composer.json');
-            $versionName = reset($filteredVersions)['name'];
+            $tag = $this->findLatestTag($version);
+            $composerJson = $this->request('https://raw.githubusercontent.com/TYPO3/typo3/' . $tag['commit']['sha'] . '/composer.json');
+            $versionName = $tag['name'];
         }
 
         // PHP Version to install
-        $installablePhpVersion = $this->getPhpVersionFromComposer($composerJson);
+        $installablePhpVersion = $phpVersion ?: $this->getPhpVersionFromComposer($composerJson);
         $phpModules = $this->getPhpModulesFromComposer($composerJson, $installablePhpVersion, $additionalPhpModules);
 
         return [
@@ -50,6 +46,24 @@ class ComposerService
             'modules' => $phpModules,
             'tags' => $this->getVersionTags($versionName, $version)
         ];
+    }
+
+    /**
+     * GitHub returns at most 100 tags per page, newest version first.
+     */
+    private function findLatestTag(string $version): array
+    {
+        $page = 1;
+        do {
+            $tags = $this->request('https://api.github.com/repos/typo3/typo3/tags?per_page=100&page=' . $page++);
+            foreach ($tags as $tag) {
+                if (str_contains($tag['name'], $version)) {
+                    return $tag;
+                }
+            }
+        } while ($tags !== []);
+
+        throw new \RuntimeException('No TYPO3 tag found for version "' . $version . '".');
     }
 
     /**
@@ -94,18 +108,22 @@ class ComposerService
 
         $executableFinder = new ExecutableFinder();
         $binary = $executableFinder->find('docker');
-        $command = [$binary, 'run', '--rm', 'php:'. $phpVersion . '-apache', 'php', '-m'];
+        $command = [$binary, 'run', '--rm', 'php:'. $phpVersion . '-fpm', 'php', '-m'];
         $process = new Process($command);
         $process->run();
 
         if ($process->isSuccessful()) {
-            $phpModulesInContainer = explode("\n", $process->getOutput());
+            // "php -m" lists opcache as "Zend OPcache"
+            $phpModulesInContainer = array_map(
+                static fn(string $module): string => strtolower(str_replace('Zend ', '', trim($module))),
+                explode("\n", $process->getOutput())
+            );
         } else {
             throw new ProcessFailedException($process);
         }
 
         return array_filter($modules, function ($value) use ($phpModulesInContainer) {
-            return !in_array($value, $phpModulesInContainer);
+            return !in_array(strtolower($value), $phpModulesInContainer, true);
         });
     }
 

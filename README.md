@@ -41,12 +41,15 @@ Image version example:
 | Tag                    | TYPO3 version               | PHP version |
 |------------------------|-----------------------------|-------------|
 | `latest` or `dev-main` | dev-main                    | 8.1         |
+| `v14` or `v14-php8.4`  | v14.x.x (latest v14)        | 8.4         |
+| `v14-php8.5`           | v14.x.x (latest v14)        | 8.5         |
+| `v14.3-php8.5`         | v14.3.x (latest v14.3)      | 8.5         |
 | `v12`                  | v12.x.x (latest v12)        | 8.1         |
 | `v12.2`                | v12.2.x (latest v12.2)      | 8.1         |
 | `v12.2.0`              | v12.2.1 (specific version)  | 8.1         |
-| `v11`                  | v11.x.x (latest v11)        | 8.0         |
-| `v11.5`                | v11.5.x (latest v11.5)      | 8.0         |
-| `v11.5.24`             | v11.5.24 (specific version) | 8.0         |
+| `v11`                  | v11.x.x (latest v11)        | 8.1         |
+| `v11.5`                | v11.5.x (latest v11.5)      | 8.1         |
+| `v11.5.24`             | v11.5.24 (specific version) | 8.1         |
 | ...                    | ...                         | ...         |
 
 
@@ -69,6 +72,8 @@ Image version example:
 | Option | Description                                                                                                                                                                                                                                   |
 |--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | --php  | Specify PHP version (If not set the lower bound defined in composer.json will be used)                                                                                                                                                        |
+| --php-tag | Add the PHP version to all image tags, e.g. `v14-php8.5`. Needed when building one TYPO3 version for several PHP versions |
+| --keep-plain-tags | With `--php-tag`, also add the tags without PHP version, e.g. `v14` |
 | -x     | Build multi-arch image                                                                                                                                                                                                                        |
 | -p     | Push image to docker hub after successful build                                                                                                                                                                                               |
 | -l     | Load image into docker                                                                                                                                                                                                                        |

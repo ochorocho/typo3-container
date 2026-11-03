@@ -42,6 +42,14 @@ jobs:
         with:
           php-version: '8.3'
       -
+        name: "TYPO3 v14 (PHP 8.4)"
+        shell: 'script -q -e -c "bash {0}"'
+        run: ./bin/t3-container build ochorocho/typo3-container v14 --php 8.4 --php-tag --keep-plain-tags -x -p
+      -
+        name: "TYPO3 v14 (PHP 8.5)"
+        shell: 'script -q -e -c "bash {0}"'
+        run: ./bin/t3-container build ochorocho/typo3-container v14 --php 8.5 --php-tag -x -p
+      -
         name: "TYPO3 v13"
         shell: 'script -q -e -c "bash {0}"'
         run: ./bin/t3-container build ochorocho/typo3-container v13 --php 8.3 -x -p
@@ -53,4 +61,4 @@ jobs:
       -
         name: "TYPO3 v11"
         shell: 'script -q -e -c "bash {0}"'
-        run: ./bin/t3-container build ochorocho/typo3-container v11 -x -p
+        run: ./bin/t3-container build ochorocho/typo3-container v11 --php 8.1 -x -p

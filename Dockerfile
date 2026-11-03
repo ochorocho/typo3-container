@@ -17,7 +17,7 @@ USER root
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-        imagemagick ghostscript locales-all libzip4 libpq-dev \
+        imagemagick ghostscript locales-all libpq-dev \
         libzip-dev libcurl4-openssl-dev libpng-dev libwebp-dev libjpeg62-turbo-dev libreadline-dev libicu-dev libonig-dev libfreetype6-dev libxml2-dev && \
     $php_ext_configure && \
     # Unattended install of the redis module
@@ -39,8 +39,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 # Configure PHP
 COPY config/typo3.ini /usr/local/etc/php/conf.d/typo3.ini
 
-# Allow ImageMagick 6 to read/write pdf files
-COPY config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
+# Allow ImageMagick to read/write pdf files. The major version depends on the Debian release of the base image.
+COPY config/imagemagick-policy.xml /tmp/imagemagick-policy.xml
+RUN cp /tmp/imagemagick-policy.xml /etc/ImageMagick-*/policy.xml && rm /tmp/imagemagick-policy.xml
 
 # USER www-data
 

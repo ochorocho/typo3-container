@@ -26,6 +26,8 @@ class CreateContainerCommand extends Command
         $this->addOption('load', 'l', InputOption::VALUE_NONE, 'Load image into docker.');
         $this->addOption('no-cache', 'nc', InputOption::VALUE_NONE, 'Build image without cache.');
         $this->addOption('php', null, InputOption::VALUE_OPTIONAL, 'Specify PHP version.');
+        $this->addOption('php-tag', null, InputOption::VALUE_NONE, 'Add the PHP version to all image tags, e.g. v14-php8.5.');
+        $this->addOption('keep-plain-tags', null, InputOption::VALUE_NONE, 'With --php-tag, also add the tags without PHP version, e.g. v14.');
         $this->addOption('php-modules', 'm', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Install additional PHP modules.');
         $this->addOption('platforms', 'a', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'List of platform architectures to build.', ['linux/arm64','linux/amd64']);
         $this->addOption('container-engine', 'e', InputOption::VALUE_OPTIONAL, 'Choose a container engine for building the image (supported: docker, podman)', 'docker');
@@ -43,16 +45,17 @@ class CreateContainerCommand extends Command
         }
 
         $composerService = new ComposerService();
-        $requirements = $composerService->getRequirements($version, $input->getOption('php-modules'));
+        $requirements = $composerService->getRequirements($version, $input->getOption('php-modules'), $input->getOption('php'));
         $phpModules = $requirements['modules'];
 
         // @todo: We may want to use the upper/lower bound defined in composer.json
         $phpVersion = $requirements['php'];
-        if($input->getOption('php')) {
-            $phpVersion = $input->getOption('php');
-        }
 
         $tags = $requirements['tags'];
+        if($input->getOption('php-tag')) {
+            $phpTags = array_map(static fn(string $tag): string => $tag . '-php' . $phpVersion, $tags);
+            $tags = $input->getOption('keep-plain-tags') ? array_merge($tags, $phpTags) : $phpTags;
+        }
 
         // Image tags, option: -t
         $tagOption = [];
