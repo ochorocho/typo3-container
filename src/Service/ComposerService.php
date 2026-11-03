@@ -4,9 +4,6 @@ namespace Ochorocho\T3Container\Service;
 
 use Composer\Package\Version\VersionParser;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -15,6 +12,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ComposerService
 {
+    // Part of the PHP binaries, there is no package to install
+    private const BUNDLED_MODULES = ['json', 'libxml', 'openssl', 'pcre', 'session', 'sodium', 'zlib'];
+
     private HttpClientInterface $client;
 
     public function __construct()
@@ -39,11 +39,12 @@ class ComposerService
 
         // PHP Version to install
         $installablePhpVersion = $phpVersion ?: $this->getPhpVersionFromComposer($composerJson);
-        $phpModules = $this->getPhpModulesFromComposer($composerJson, $installablePhpVersion, $additionalPhpModules);
+        $phpModules = $this->getPhpModulesFromComposer($composerJson, $additionalPhpModules);
 
         return [
             'php' => $installablePhpVersion,
             'modules' => $phpModules,
+            'packages' => $this->getPhpPackages($phpModules, $installablePhpVersion),
             'tags' => $this->getVersionTags($versionName, $version)
         ];
     }
@@ -94,37 +95,40 @@ class ComposerService
      * Get all PHP modules
      * - Read modules from composer
      * - Add necessary modules not defined in composer
-     * - Remove all modules from array already contained in the php available in the docker image
+     * - Add modules given by the user, a value may contain several modules, e.g. "intl opcache"
      */
-    private function getPhpModulesFromComposer(array $json, string $phpVersion, array $additionalPhpModules = []): array
+    private function getPhpModulesFromComposer(array $json, array $additionalPhpModules = []): array
     {
-        $modules = ["zip", "opcache", "pgsql", "pdo_pgsql", "pdo_mysql", "mysqli", "openssl", "zlib"];
-        $modules += $additionalPhpModules;
+        $modules = [
+            "gd", "redis", "curl", "mbstring", "xml", "zip", "opcache", "pgsql", "pdo_pgsql",
+            "pdo_mysql", "mysqli", "sqlite3", "pdo_sqlite", "openssl", "zlib",
+        ];
+        $modules = array_merge($modules, preg_split('/\s+/', implode(' ', $additionalPhpModules), -1, PREG_SPLIT_NO_EMPTY));
         foreach ($json['require'] as $key => $value) {
             if($key !== 'ext-PDO' && str_starts_with($key, 'ext-')) {
                 $modules[] = str_replace('ext-', '', $key);
             }
         }
 
-        $executableFinder = new ExecutableFinder();
-        $binary = $executableFinder->find('docker');
-        $command = [$binary, 'run', '--rm', 'php:'. $phpVersion . '-fpm', 'php', '-m'];
-        $process = new Process($command);
-        $process->run();
+        return array_values(array_unique(array_map('strtolower', $modules)));
+    }
 
-        if ($process->isSuccessful()) {
-            // "php -m" lists opcache as "Zend OPcache"
-            $phpModulesInContainer = array_map(
-                static fn(string $module): string => strtolower(str_replace('Zend ', '', trim($module))),
-                explode("\n", $process->getOutput())
-            );
-        } else {
-            throw new ProcessFailedException($process);
+    /**
+     * Translate PHP modules to Sury apt packages, e.g. "pdo_mysql" to "php8.4-pdo-mysql".
+     * Some of these are virtual packages, apt selects the package providing them.
+     */
+    private function getPhpPackages(array $modules, string $phpVersion): array
+    {
+        $bundledModules = self::BUNDLED_MODULES;
+        // OPcache is part of PHP itself since 8.5
+        if (version_compare($phpVersion, '8.5', '>=')) {
+            $bundledModules[] = 'opcache';
         }
 
-        return array_filter($modules, function ($value) use ($phpModulesInContainer) {
-            return !in_array(strtolower($value), $phpModulesInContainer, true);
-        });
+        return array_map(
+            static fn(string $module): string => 'php' . $phpVersion . '-' . str_replace('_', '-', $module),
+            array_values(array_diff($modules, $bundledModules))
+        );
     }
 
     private function getVersionTags($detectedVersion, $version): array
