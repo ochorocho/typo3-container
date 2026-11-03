@@ -79,7 +79,7 @@ class CreateContainerCommand extends Command
         // Output general details
         $output->writeln('<info>PHP version to be included:</info>');
         $output->writeln(' * ' . $requirements['php']);
-        $output->writeln('<info>PHP modules to be included (excluding those already enabled):</info>');
+        $output->writeln('<info>PHP modules to be included:</info>');
         $output->writeln(' * ' . implode(PHP_EOL . ' * ', $requirements['modules']));
         $output->writeln('⛵️ Using container engine "' . $engine . '" (' . $binary . ')');
         $output->writeln('🧱 Build TYPO3 version ' . $version . ' ' . $platformMessage);
@@ -110,9 +110,9 @@ class CreateContainerCommand extends Command
         $command[] = '--build-arg';
         $command[] = 'php_version=' . $phpVersion;
         $command[] = '--build-arg';
-        $command[] = 'php_modules=' . implode(' ', $phpModules);
+        $command[] = 'php_packages=' . implode(' ', $requirements['packages']);
         $command[] = '--build-arg';
-        $command[] = 'php_ext_configure=docker-php-ext-configure gd --with-freetype --with-jpeg';
+        $command[] = 'php_modules=' . implode(' ', $phpModules);
 
         if($input->getOption('push')) {
             $command[] = '--push';
