@@ -1,6 +1,6 @@
 ### TYPO3 Docker Builder
 
-Use the `./bin/t3-container` script to build a Docker container for TYPO3 v11 and later.
+Use the `./bin/t3-container` script to build a Docker container for TYPO3 v12 and later.
 This little wrapper is used to feed the `Dockerfile` with all required
 variables (TYPO3 version, PHP modules, PHP version). PHP modules and PHP version will
 be composed of requirements found in [composer.json](https://raw.githubusercontent.com/TYPO3/typo3/main/composer.json). 
@@ -47,9 +47,6 @@ Image version example:
 | `v12`                  | v12.x.x (latest v12)        | 8.1         |
 | `v12.2`                | v12.2.x (latest v12.2)      | 8.1         |
 | `v12.2.0`              | v12.2.1 (specific version)  | 8.1         |
-| `v11`                  | v11.x.x (latest v11)        | 8.1         |
-| `v11.5`                | v11.5.x (latest v11.5)      | 8.1         |
-| `v11.5.24`             | v11.5.24 (specific version) | 8.1         |
 | ...                    | ...                         | ...         |
 
 
