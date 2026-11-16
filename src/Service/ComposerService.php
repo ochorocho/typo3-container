@@ -4,6 +4,7 @@ namespace Ochorocho\T3Container\Service;
 
 use Composer\Package\Version\VersionParser;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -20,6 +21,13 @@ class ComposerService
     public function __construct()
     {
         $this->client = HttpClient::create();
+
+        // Anonymous GitHub API calls are limited to 60 per hour and IP, CI runners share IPs.
+        // The token is only sent to api.github.com.
+        $token = getenv('GITHUB_TOKEN');
+        if (is_string($token) && $token !== '') {
+            $this->client = ScopingHttpClient::forBaseUri($this->client, 'https://api.github.com/', ['auth_bearer' => $token]);
+        }
     }
 
     /**

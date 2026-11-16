@@ -55,5 +55,7 @@ jobs:
           php-version: '8.3'
       -
         name: Build image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: 'script -q -e -c "bash {0}"'
         run: ./bin/t3-container build ochorocho/typo3-container ${{ matrix.version }} ${{ matrix.options }} -x
